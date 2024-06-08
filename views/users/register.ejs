@@ -1,33 +1,61 @@
 
+
+
+
+
 <%- include('../partials/users/loginheader.ejs') %>
 
-<div class="form signup">
+
+<section class="container forms">
+    <div class="form Signup">
     <div class="form-content">
-        <header>Signup</header>
-        <form action="#">
-            <div class="field input-field">
-                <input type="email" placeholder="Email" class="input">
-            </div>
-
-            <div class="field input-field">
-                <input type="password" placeholder="Create password" class="password">
-            </div>
-
-            <div class="field input-field">
-                <input type="password" placeholder="Confirm password" class="password">
-                <i class='bx bx-hide eye-icon'></i>
-            </div>
-
-            <div class="field button-field">
-                <button>Signup</button>
-            </div>
-        </form>
-
-        <div class="form-link">
-            <span>Already have an account? <a href="#" class="link login-link">Login</a></span>
+    <form action="/register" method="post">
+        <div class="field input-field">
+            <input type="text" class="form-control" id="name" placeholder="Enter name" name="name" required class="input" oninput="validateName()">
+            <span id="nameError" style="color: red;font-size:10px;"></span>
         </div>
-    </div>
+        </div>
 
+        <div class="field input-field">
+            <input type="email" class="form-control" id="email" placeholder="Enter email" name="email" required class="email" oninput="validateEmail()">
+            <span id="emailError" style="color: red;font-size:10px;"></span>
+        </div>
+
+        <div class="field input-field">
+            <input type="number" class="form-control" id="number" placeholder="Enter mobile" name="mobile" required class="mobile" oninput="validateMobile()">
+            <span id="numberError" style="color: red;font-size:10px;"></span>
+        </div>
+
+        <div class="field input-field">
+            <input type="password" class="form-control" id="password" placeholder="Enter password" name="password" required class="password" oninput="validatePassword()">
+            <span id="passwordError" style="color: red ;font-size:6px;"></span>
+        </div>
+
+        <div class="field input-field">
+            <input type="password" class="form-control" id="confirmPassword" placeholder="Confirm password" name="confirmPassword" required class="password" oninput="validateConfirmPassword()">
+            <span id="confirmPasswordError" style="color: red;font-size:10px;"></span>
+        </div>
+        
+        
+        <div class="field button-field">
+            <button type="submit" id="submitButton" disabled value="signup" name="submitButton"  value="submit">Signup</button>
+
+            <p class="form-link">Already have an account? <a href="/login" class="link login-link">Login</a>
+            </p>
+            
+            
+        </div>
+    </form>
+    <%
+    if(typeof message !== 'undefined'){
+      %>
+      <h4 style="color: rgb(232, 9, 9);"><%= message %></h4>
+      <%
+    }
+    %>
+
+    
+    
     <div class="line"></div>
 
     <div class="media-options">
@@ -43,6 +71,119 @@
             <span>Login with Google</span>
         </a>
     </div>
-
+    </div>
 </div>
 </section>
+<script>
+    let username = false
+let useremail = false
+let usernumber = false
+let userpassword = false
+let userconfirmpassword = false
+
+function updateSubmitButton(){
+
+const SubmitButton = document.getElementById('submitButton')
+
+if(username&&useremail&&usernumber&&userpassword&&userconfirmpassword){
+SubmitButton.removeAttribute('disabled')
+}else{
+SubmitButton.setAttribute('disabled','disabled')
+}
+
+}
+
+function validateName(){
+let name = document.getElementById('name').value;
+const nameRegex =  /^[A-Za-z\s]+$/;
+if(!name){
+username=false
+document.getElementById('nameError').innerText = "name is required"
+
+}else if(!name.match(nameRegex)){
+username=false
+document.getElementById('nameError').innerText = 'Name can only contain letters and spaces';
+}else{
+username = true
+document.getElementById('nameError').innerText =""
+updateSubmitButton()
+}
+}
+
+function validateEmail() {
+let email = document.getElementById("email").value;
+const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+if (!email) {
+useremail = false
+document.getElementById("emailError").innerText = "Email is required"
+} else if (!email.match(emailRegex)) {
+useremail = false
+document.getElementById("emailError").innerText = "Please enter a valid email address"
+} else {
+useremail = true
+document.getElementById("emailError").innerText = ""
+updateSubmitButton();
+}
+}
+
+function validateMobile() {
+let mobile = document.getElementById("number").value;
+const mobileRegex = /^\d{10}$/;
+if (!mobile) {
+usernumber = false
+document.getElementById("numberError").innerText = "Mobile number is required"
+} else if (!mobile.match(mobileRegex)) {
+usernumber = false
+document.getElementById("numberError").innerText = "Please enter a valid 10-digit mobile number"
+} else {
+usernumber = true
+document.getElementById("numberError").innerText = ""
+updateSubmitButton();
+}
+}
+
+function validatePassword() {
+let password = document.getElementById("password").value;
+const passwordRegex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])[0-9a-zA-Z]{8,}$/;
+if (!password) {
+userpassword = false
+document.getElementById("passwordError").innerText = "Password is required"
+}
+else if (!password.match(passwordRegex)) {
+userpassword = false
+document.getElementById("passwordError").innerText ="Password must contain at least 8 characters,including at least one uppercase and lowercase letter and a digit"
+} else {
+userpassword = true
+document.getElementById("passwordError").innerText = ""
+updateSubmitButton();
+}
+}
+
+function validateConfirmPassword() {
+let password = document.getElementById("password").value;
+let confirmPassword = document.getElementById("confirmPassword").value;
+
+
+if (!confirmPassword) {
+userconfirmpassword = false;
+document.getElementById("confirmPasswordError").innerText = "Confirm password is required";
+}
+else if (password !== confirmPassword) {
+userconfirmpassword = false;
+document.getElementById("confirmPasswordError").innerText = "Passwords do not match";
+}
+
+else {
+userconfirmpassword = true;
+document.getElementById("confirmPasswordError").innerText = "";
+updateSubmitButton();
+}
+}
+</script>
+    <script src="js/main.js"></script>
+    <script src="javascripts/validation"></script>
+       
+    
+    
+</body>
+</html>
