@@ -8,11 +8,14 @@ const app = express()
 
 app.set('view engine','ejs')
 
-app.use(express.static('public/users'));
 app.use(express.static('public/admin'));
+app.use(express.static('public/users'));
+const path = require('path')
+
+app.use(express.static(path.join(__dirname, 'public')));
 
 
-//app.use(express.static(path.join(__dirname, 'public')));
+
 
 const userRoute = require('./routes/userRoute')
 app.use('/',userRoute)

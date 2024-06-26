@@ -1,15 +1,7 @@
-const users = require('../models/userModel')
-const productsModel = require('../models/productModel')
+const users = require('../../models/userModel')
+const productsModel = require('../../models/productModel')
+const category = require('../../models/categoryModel')
 const bcrypt = require('bcrypt')
-
-const getAdminPanel = async(req,res)=>{
-    try{
-        res.render('admin-panel')
-    }catch(error){
-        console.log(error.message)
-    }
-}
-
 
 const getLogin = async(req,res)=>{
     try{
@@ -35,7 +27,7 @@ const postLogin = async(req,res)=>{
             }
             else{
                 req.session.admin_id = adminDB.admin_id
-                res.redirect('/admin')
+              res.redirect('/admin')
             }
         }
         else{
@@ -52,17 +44,16 @@ const postLogin = async(req,res)=>{
 const getLogout = async(req,res)=>{
     try{
         req.session.destroy()
-        res.redirect('/admin/login')
+       return res.redirect('/admin/login')
     }catch(error){
         console.log(error.message)
 
     }
 }
+
 module.exports = {
     getLogin,
     postLogin,
-    getAdminPanel,
     getLogout
-
-
 }
+

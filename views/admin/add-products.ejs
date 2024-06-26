@@ -1,3 +1,6 @@
+
+<%- include('../partials/admin/header.ejs') %>
+
 <div class="clearfix"></div>
 
     <div class="content-wrapper">
@@ -9,7 +12,8 @@
                         <div class="card-body">
                             <div class="card-title">ADD NEW PRODUCT</div>
                             <hr>
-                            <form method="post" enctype="multipart/form-data">
+                            <form method="post"  id="productForm"  enctype="multipart/form-data">
+                             
                                 <div class="form-group">
                                     <label for="input-1">Product Name</label>
                                     <input type="text" name="name" class="form-control" required id="input-1"
@@ -18,9 +22,9 @@
 
                                 <div class="form-group">
                                   <label for="input-1">Price</label>
-                                  <input type="number" name="price" required class="form-control" id="input-1" placeholder="Enter price">
-                                  <div class="d-none" id="price_error" style="color: red;">Price must be a positive number</div>
-                                  <div class="d-none" id="negative_price_warning" style="color: red;">Warning: Negative price entered</div>
+                                  <input type="number" name="price" required class="form-control" id="price" placeholder="Enter price" oninput="validatePriceInput(this)">
+                                  <div class="d-none" id="price_error" style="color: red;"></div>
+                                  <div class="d-none" id="negative_price_warning" style="color: red;"></div>
                               </div>
 
                                 
@@ -32,10 +36,26 @@
                                         placeholder="Give description about the product">
                                 </div>
 
+                                <div class="form-group">
+                                  <label for="input-1">Select category</label>
+                                  <select name="category" style="background-color:rgb(58,133,169);"
+                                      class="form-select" id="input-1"
+                                      aria-label="Floating label select example">
+                                      <% if(categoryData.length> 0) {
+                                          for(let i=0; i < categoryData.length; i++) { %>
+                                              <option value="<%= categoryData[i].name %>"
+                                                  style="background-color:rgb(58,133,169);">
+                                                  <%= categoryData[i].name %>
+                                              </option>
+                                              <% } } %>
+                                  </select>
+
+                              </div>
+
                                 <div id="preview"></div>
                                 <div class="form-group">
                                     <label for="input-1">Image</label>
-                                    <input type="file" multiple name="image" required class="form-control" id="input-1">
+                                    <input type="file" multiple required name="image" required class="form-control" id="input-1">
                                 </div>
 
 
@@ -43,8 +63,8 @@
                                 <div class="form-group">
                                   <label for="input-1">Enter stock </label>
                                   <input type="number" name="stock" required class="form-control" id="input-1" placeholder="Enter stock">
-                                  <div class="d-none" id="stock_error" style="color: red;">Stock must be a positive number</div>
-                                  <div class="d-none" id="negative_stock_warning" style="color: red;">Warning: Negative Stock Entered</div>
+                                  <div class="d-none" id="stock_error" style="color: red;"></div>
+                                  <div class="d-none" id="negative_stock_warning" style="color: red;"></div>
                               </div>
                                 
 
@@ -53,18 +73,14 @@
                                         ADD</button>
                                 </div>
                             </form>
-
+                            
                             <script>
                               function validateForm() {
                                   const priceInput = document.querySelector('input[name="price"]');
                                   const stockInput = document.querySelector('input[name="stock"]');
-                                  const priceError = document.getElementById('price_error');
-                                  const stockError = document.getElementById('stock_error');
-                                  const negativePriceWarning = document.getElementById('negative_price_warning');
-                                  const negativeStockWarning = document.getElementById('negative_stock_warning');
                           
-                                  const isPriceValid = validateNumberInput(priceInput, priceError, negativePriceWarning);
-                                  const isStockValid = validateNumberInput(stockInput, stockError, negativeStockWarning);
+                                  const isPriceValid = validatePriceInput(priceInput);
+                                  const isStockValid = validateStockInput(stockInput);
                           
                                   if (isPriceValid && isStockValid) {
                                       // Submit the form if both price and stock are valid
@@ -72,52 +88,70 @@
                                   }
                               }
                           
-                              function validateNumberInput(input, errorElement, warningElement) {
+                              function validatePriceInput(input) {
                                   const value = parseFloat(input.value);
+                                  const priceError = document.getElementById('price_error');
+                          
+                                  if (input.value === "") {
+                                      priceError.classList.add("d-none");
+                                      priceError.innerText = "";
+                                      return false;
+                                  }
                           
                                   if (!isNaN(value) && value >= 0) {
-                                      errorElement.classList.add("d-none");
-                                      warningElement.classList.add("d-none");
+                                      priceError.classList.add("d-none");
+                                      priceError.innerText = "";
                                       return true;
                                   } else if (value < 0) {
-                                      errorElement.classList.add("d-none");
-                                      warningElement.classList.remove("d-none");
+                                      priceError.classList.remove("d-none");
+                                      priceError.innerText = "Warning: Negative price entered";
                                       return false;
                                   } else {
-                                      errorElement.classList.remove("d-none");
-                                      warningElement.classList.add("d-none");
+                                      priceError.classList.remove("d-none");
+                                      priceError.innerText = "Price must be a positive number";
                                       return false;
                                   }
                               }
-                          </script>
                           
-
-                            <script>
+                              function validateStockInput(input) {
+                                  const value = parseFloat(input.value);
+                                  const stockError = document.getElementById('stock_error');
+                          
+                                  if (input.value === "") {
+                                      stockError.classList.add("d-none");
+                                      stockError.innerText = "";
+                                      return false;
+                                  }
+                          
+                                  if (!isNaN(value) && value >= 0) {
+                                      stockError.classList.add("d-none");
+                                      stockError.innerText = "Stock must be a positive number"; // Clear any previous error message
+                                      return true;
+                                  } else if (value < 0) {
+                                      stockError.classList.remove("d-none");
+                                      stockError.innerText = "Warning: Negative stock entered";
+                                      return false;
+                                  } else {
+                                      stockError.classList.remove("d-none");
+                                      stockError.innerText = "Stock must be a positive number";
+                                      return false;
+                                  }
+                              }
+                          
                               document.addEventListener("DOMContentLoaded", function() {
-                                var priceInput = document.getElementById("price");
-                                var stockInput = document.getElementById("stock");
-
-                                var priceError = document.getElementById("price_error");
-                                var stockError = document.getElementById("stock_error");
-
-                                  // Function to validate positive number
-                                  // Assuming you have an input field with the ID 'numberInput' and an error element with the ID 'numberError'
-                                  
-                                  numberInput.addEventListener("input", function() {
-                                      var number = numberInput.value;
-                                      var numberPattern = /^\d*\.?\d+$/; // Regular expression for positive numbers
-
-                                      if (numberPattern.test(number) && parseFloat(number) > 0) {
-                                          numberError.classList.add("d-none");
-                                      } else {
-                                          numberError.classList.remove("d-none");
-                                      }
-                                    })
+                                  const priceInput = document.getElementById("price");
+                                  const stockInput = document.getElementById("stock");
+                          
+                                  priceInput.addEventListener("input", function() {
+                                      validatePriceInput(priceInput);
                                   });
-
-
-                                  
-                            </script>
+                          
+                                  stockInput.addEventListener("input", function() {
+                                      validateStockInput(stockInput);
+                                  });
+                                })
+                                </script>
+                           
                             <% if(typeof message !=='undefined' ){ %>
                                 <h6><br>
                                     <%= message %>
@@ -225,4 +259,4 @@
               </script>
               
 
-            <%- include('../partials/admin/footer.ejs') %>
+          
