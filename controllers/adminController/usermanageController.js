@@ -1,7 +1,8 @@
-const users = require('../../models/userModel')
+
 const productsModel = require('../../models/productModel')
 const category = require('../../models/categoryModel')
 const bcrypt = require('bcrypt')
+const users = require('../../models/userModel')
 
 
 const getUserManagement = async(req,res)=>{

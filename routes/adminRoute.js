@@ -6,8 +6,10 @@ const productController = require('../controllers/adminController/productControl
 const usermanageController = require('../controllers/adminController/usermanageController')
 const loginController = require('../controllers/adminController/loginController')
 const dashBoardController = require('../controllers/adminController/dashBoardController')
+const ordrController = require('../controllers/adminController/ordrController')
+const couponController = require('../controllers/adminController/couponController')
 
-//const auth = require('../middleware/adminAuth')
+const authAdmin = require('../middlewares/authAdmin')
 const session = require('express-session')
 
 admin_route.set('view engine','ejs')
@@ -36,24 +38,44 @@ const storage = multer.diskStorage({
 })
 
 const upload = multer({storage:storage})
+const moment = require("moment-timezone");
+
+const parseDateMiddleware = (req, res, next) => {
+    const { from, to } = req.query;
+
+    console.log('Original from:', from);
+    console.log('Original to:', to);
+
+    if (from) {
+        req.query.from = moment.utc(from);
+        console.log('Transformed from:', req.query.from);
+    }
+
+    if (to) {
+        req.query.to = moment.utc(to);
+        console.log('Transformed to:', req.query.to);
+    }
+
+    next();
+};
 
 admin_route.use(express.json())
 admin_route.use(express.urlencoded({extended:true}))
 //Admin controller
-admin_route.get('/',dashBoardController.getAdminPanel)
-admin_route.get('/login',loginController.getLogin)
+admin_route.get('/',authAdmin.isLogin,dashBoardController.getAdminPanel)
+admin_route.get('/login',authAdmin.isLogout,loginController.getLogin)
 admin_route.post('/login',loginController.postLogin)
-admin_route.get('/logout',loginController.getLogout)
+admin_route.get('/logout',authAdmin.isLogin,loginController.getLogout)
 
 //usermanagement
 
-admin_route.get('/users',usermanageController.getUserManagement)
-admin_route.get('/users/block',usermanageController.blockUser)
-admin_route.get('/users/unblock',usermanageController.unblockUser)
+admin_route.get('/users',authAdmin.isLogin,usermanageController.getUserManagement)
+admin_route.get('/users/block',authAdmin.isLogin,usermanageController.blockUser)
+admin_route.get('/users/unblock',authAdmin.isLogin,usermanageController.unblockUser)
 
 //category managment
 
-admin_route.get('/category',categoryController.getCategory)
+admin_route.get('/category',authAdmin.isLogin,categoryController.getCategory)
 admin_route.get('/category/add',categoryController.getAddCategoryPage)
 admin_route.post('/category/add',categoryController.addCategory)
 admin_route.get('/category/block',categoryController.blockCategory)
@@ -70,6 +92,23 @@ admin_route.post('/products/edit',upload.array('image'),productController.postEd
 admin_route.post('/delete_image',productController.deleteImage)
 admin_route.get('/products/block',productController.blockProduct)
 admin_route.get('/products/unblock',productController.unBlockProduct)
+
+admin_route.get('/orders',ordrController.getOrders)
+admin_route.get('/singleorder',ordrController.getSingleOrder)
+admin_route.get('/editorder',ordrController.editOrder)
+
+
+admin_route.get('/coupons',couponController.getCouponListPage)
+admin_route.post('/coupons/add',couponController.postAddCoupon)
+admin_route.get('/coupons/edit',couponController.editCoupon)
+admin_route.post('/coupons/edit',couponController.postEditCoupon)
+admin_route.get('/coupons/add',couponController.getCouponAddPage)
+admin_route.get('/coupons/delete',couponController.deleteCoupon)
+
+admin_route.get('/salesreport',authAdmin.isLogin,dashBoardController.getSalesReport)
+admin_route.get('/salesreport/download', authAdmin.isLogin, parseDateMiddleware, dashBoardController.downloadSalesReport);
+
+
 
 module.exports = admin_route
 

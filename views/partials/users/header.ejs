@@ -25,6 +25,9 @@
 
      <!--ajax-->
      <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.3/jquery.min.js"></script>
+     
+    
+
 
      <!--animatin sweet alert-->
      <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -83,12 +86,12 @@
                            
                     <div class="header__top__left__auth">
                         
-                            <% if (session) { %>
+                             <% if (session) { %> 
                                 <a href="/profile"><i class="fa fa-user"></i>
                                     <%= userData.name %>
                                 </a>
                                 <a href="/user-logout"><i class="fa fa-power-off"></i> Logout</a>
-                                <% } else { %>
+ <% } else { %>
                                     <a href="/login"><i class="fa fa-user"></i> Login</a>
                                     <a href="/register"><i class="fa fa-user-plus"></i> Register</a>
                                     <% } %>

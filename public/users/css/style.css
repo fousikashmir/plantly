@@ -1865,9 +1865,9 @@ ol {
 	text-align: right;
 }
 
-.shoping__cart__table table tbody tr td.shoping__cart__item__close span {
-	font-size: 24px;
-	color: #b2b2b2;
+.shoping__cart__table table tbody tr td.shoping__cart__item__close button {
+	font-size: 12px;
+	color: #df2121;
 	cursor: pointer;
 }
 

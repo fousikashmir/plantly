@@ -1,5 +1,69 @@
 
 <%- include('../partials/users/loginheader.ejs') %>
+<style>
+    .login_box_area {
+    padding: 50px 0;
+    background-color: #f7f7f7; 
+}
+
+.login_form_inner {
+    background-color: #ffffff;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.login_form_inner h3 {
+    font-size: 24px;
+    margin-bottom: 20px;
+    color: #333;
+    text-align: center;
+}
+
+.login_form_inner .form-group {
+    margin-bottom: 20px;
+}
+
+.login_form_inner .form-control {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-sizing: border-box;
+    font-size: 16px;
+}
+
+.login_form_inner .form-control:focus {
+    border-color: #5b9be2;
+    outline: none;
+}
+
+.login_form_inner .button-register {
+    background-color: #5b9be2;
+    color: #fff;
+    border: none;
+    padding: 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    width: 100%;
+}
+
+.login_form_inner .button-register:hover {
+    background-color: #4a85d5;
+}
+
+#countdown-timer {
+    text-align: center;
+    margin-top: 10px;
+    color: #333;
+}
+
+h4 {
+    text-align: center;
+    color: #e74c3c; /* Red color for error messages */
+}
+</style>
        
 
 <section class="login_box_area section-margin">
@@ -15,6 +79,7 @@
                             <input type="text" class="form-control" id="otp" name="otp"
                                 placeholder="Enter otp" onfocus="this.placeholder = ''"
                                 onblur="this.placeholder = 'enter otp Address'">
+                                
                         </div>
                         
                         <div class="col-md-12 form-group">
@@ -35,11 +100,7 @@
 </section>
 <!--================End Login Box Area =================-->
 
-<h1></h1>
-<h1></h1>
-<h1></h1>
-<div></div>
-<div>.9</div>
+
 <script>
     function startTimer(duration, display) {
       var timer = duration, minutes, seconds;

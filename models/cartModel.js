@@ -1,6 +1,7 @@
 const mongoose = require('mongoose')
 const {ObjectId} = require('mongodb')
 
+
 const cartSchema = mongoose.Schema({
     userId : {
         type : ObjectId,
@@ -13,7 +14,11 @@ const cartSchema = mongoose.Schema({
             ref : 'products',
             req : true,
         },
-        quantity : {
+        quantity:{
+            type:Number,
+            required : true
+        },
+        count : {
             type : Number,
             default : 1
         },
@@ -25,6 +30,8 @@ const cartSchema = mongoose.Schema({
             type : Number,
             default : 0
         }
+        
+        
     }]
 
         

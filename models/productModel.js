@@ -43,6 +43,22 @@ const productSchema = mongoose.Schema({
         type:String,
         required:true,
         trim: true
+    },
+    popularity: {
+        type: Number,
+        default: 0
+    },
+    average_rating: {
+        type: Number,
+        default: 0
+    },
+    is_featured: {
+        type: Boolean,
+        default: false
+    },
+    created_at: {
+        type: Date,
+        default: Date.now
     }
 })
 

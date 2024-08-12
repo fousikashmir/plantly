@@ -8,9 +8,16 @@ const forgotController = require("../controllers/userController/forgotController
 const loginController = require("../controllers/userController/loginController")
 const prodController = require("../controllers/userController/prodController")
 const registerController = require("../controllers/userController/registerController")
+const cartController = require("../controllers/userController/cartController")
+const profileController = require("../controllers/userController/profileController")
+const orderController = require("../controllers/userController/orderController")
+const checkoutController = require("../controllers/userController/checkoutController")
+const wishListController = require("../controllers/userController/wishListController")
+const walletController = require("../controllers/userController/walletController")
+const couponUserController = require("../controllers/userController/couponUserController")
 
 const session = require('express-session')
-const auth = require('../middleware/auth')
+const auth = require('../middlewares/auth')
 
 
 
@@ -57,17 +64,56 @@ user_route.get('/restpassword', forgotController.loadresetpassword)
 user_route.post('/restpassword', forgotController.resetpassword)
 
 //logout
-user_route.get('/user-logout',homeController.userLogout)
+user_route.get('/user-logout',auth.isLogin,homeController.userLogout)
 
 
 //get product page
 user_route.get('/product/:id',prodController.getProductPage)
-user_route.get('/shop', prodController.getShopPage)
+
+//cart
+user_route.get('/cart',cartController.getCart) 
+user_route.post('/addToCart',cartController.addToCart)
+user_route.get('/removeproduct/:id',auth.isLogin,cartController.removeProduct)
+//ajx
+user_route.patch('/cartqntyincrease',auth.isLogin,cartController.cartQuantityIncrease,cartController.totalProductPrice)
+user_route.delete('/removeproduct/:id',auth.isLogin,cartController.postRemoveProduct)
+
+//profile
+user_route.get('/profile',profileController.getProfile)
+user_route.get('/edit',profileController.editProfile)
+user_route.post('/edit',profileController.updateProfile)
+user_route.get('/add-address',profileController.getAddAddress)
+user_route.post('/add-address',profileController.postAddAddress)
+user_route.post('/delete-address/:index',profileController.deleteAddress)
+user_route.get('/edit-address/:index',profileController.getEditAddress)
+user_route.post('/edit-address/:index',profileController.postEditAddress)
+user_route.get('/changepassword',profileController.loadChangePassword)
+user_route.post('/changepassword',profileController.changePassword)
+user_route.get('/shop', profileController.getShopPage)
+
+user_route.get('/checkout',auth.isLogin,checkoutController.getCheckout)
 
 
 
 
+//order
+user_route.post('/checkout',checkoutController.placeOrder)
+user_route.get('/placeorder',checkoutController.orderPlaced)
+user_route.post('/verifyPayment',orderController.verifyOnlinePayment)
+user_route.get('/myorders',orderController.getMyOrders)
+user_route.get('/singleorderview',orderController.getSingleOrderView)
 
+user_route.get('/editorder',orderController.editOrder)
+
+//wishlist
+user_route.get('/wishlist',auth.isLogin,wishListController.getWishList)
+user_route.post('/addtowishlist',auth.isLogin,wishListController.addToWishList)
+user_route.post('/whishtoCart',auth.isLogin,wishListController.addToCartFromWishlist)
+user_route.delete('/removeproduct',auth.isLogin,wishListController.removeProduct)
+
+user_route.post('/applyCoupon',couponUserController.applyCoupon)
+
+user_route.get('/wallet',walletController.loadWallet)
 
 
 

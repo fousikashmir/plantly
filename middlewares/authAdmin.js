@@ -1,10 +1,13 @@
 const isLogin = async(req,res,next)=>{
     try{
-        if(req.session.admin_id){}
+        if(req.session.admin_id){
+            
+        }
           else{
            return res.redirect('/admin/login')
           }
           next()
+          
 
 
     }catch(error){

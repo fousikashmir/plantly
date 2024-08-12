@@ -68,7 +68,7 @@
                 <img src="/productimages/<%= product.image[0] %>" class="img-fluid">
                 <ul class="featured__item__pic__hover">
                     <li><a href="/product/<%= product._id %>"><i class="fa fa-eye view-btn"></i></a></li>
-                    <li><a href="#" onclick="show('<%- product._id %>')"><i class="fa fa-shopping-cart"></i></a></li>
+                    <li><a  onclick="show('<%- product._id %>')"><i class="fa fa-shopping-cart"></i></a></li>
                     <li><a onclick="addtoWishlist('<%- product._id %>')"><i class="fa fa-heart love-btn"></i></a></li>
                 </ul>
             </div>
@@ -140,7 +140,7 @@
     function addtoWishlist(id) {
         console.log(id)
         $.ajax({
-            url: '/addtowhishlist',
+            url: '/addtowishlist',
             method: 'post',
             data: {
                 id: id

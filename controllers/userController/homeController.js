@@ -1,6 +1,6 @@
 const users = require("../../models/userModel")
 
-const products = require('../../models/productModel')
+const product = require('../../models/productModel')
 const category = require('../../models/categoryModel')
 
 const shortid = require('shortid');
@@ -11,9 +11,9 @@ const session = require('express-session')
 
 
 const getHome = async function(req,res){
-    const session = req.session.user_id;
+    const session=req.session.user_id
     const userData = await users.findOne({_id:session})
-    const productData = await products.find({is_blocked:false}).limit(8)
+    const productData = await product.find({is_blocked:false}).limit(8)
     
     try{
         if(session){

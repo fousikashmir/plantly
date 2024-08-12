@@ -1,5 +1,6 @@
 const users = require("../../models/userModel")
 const User = require("../../models/userModel")
+const bcrypt = require('bcrypt')
 
 
 const getLogin = async(req,res)=>{
