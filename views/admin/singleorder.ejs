@@ -17,7 +17,6 @@
                             <th scope="col">Product</th>
                             <th scope="col">Image</th>
                             <th scope="col">Prize</th>
-                            <th scope="col">Quantity</th>
                             <th scope="col">Total Amount</th>
                             <th scope="col">Payment Method</th>
                             <th scope="col">Status</th>
@@ -28,7 +27,7 @@
                         </thead>
                     <tbody>
 
-                        <% products.forEach((value,index)=>{%>
+                        <% product.forEach((value,index)=>{%>
 
                             <tr>
                                 <td>
@@ -45,7 +44,7 @@
                                   <%= value.productId.price%>
                               </td>
                                 <td>
-                                    <%= value.Quantity%>
+                                    <%= value.count%>
                                 </td>
                                 <td>
                                     RS :<%=orderData.totalAmount%>
@@ -79,3 +78,5 @@
             </div>
           </div>
       </div>
+    </div>
+  </div>

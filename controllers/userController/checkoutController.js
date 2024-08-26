@@ -32,14 +32,28 @@ const getCheckout = async function (req, res) {
         let floweringPlantsDiscount = 0;
         let couponDiscount = 0;
 
-        for(let i=0;i<products.length;i++){
+        // Check stock availability
+        for (let i = 0; i < products.length; i++) {
             const product = products[i].productId;
+            const quantityInCart = products[i].quantity;
 
-            if (product.name === 'snake plant'){
-                snakePlantDiscount += 50 * products[i].quantity;
+            // Fetch the latest stock from the database
+            const currentProduct = await productModel.findById(product._id);
+            const currentStock = currentProduct.stock;
+
+            if (quantityInCart > currentStock) {
+                // Redirect to cart page with an error message if stock is insufficient
+                return res.status(400).json({
+                    message: `The quantity for ${product.name} exceeds the available stock. Please adjust your cart.`
+                });
             }
-            if (product.category === 'Flowering plants'){
-                floweringPlantsDiscount += (product.price * 0.2) * products[i].quantity;
+
+            // Calculate discounts as before
+            if (product.name === 'snake plant') {
+                snakePlantDiscount += 50 * quantityInCart;
+            }
+            if (product.category === 'Flowering plants') {
+                floweringPlantsDiscount += (product.price * 0.2) * quantityInCart;
             }
         }
 
@@ -50,22 +64,20 @@ const getCheckout = async function (req, res) {
             { $group: { _id: null, total: { $sum: { $multiply: ["$productPrice", "$quantity"] } } } }
         ]);
 
-
-        const totalSnakePlantDiscount = totalAfterSnakePlantDiscount.length > 0 ? totalAfterSnakePlantDiscount[0].total - snakePlantDiscount :0
-
+        const totalSnakePlantDiscount = totalAfterSnakePlantDiscount.length > 0 ? totalAfterSnakePlantDiscount[0].total - snakePlantDiscount : 0;
         const totalAfterFloweringPlantDiscount = totalSnakePlantDiscount - floweringPlantsDiscount;
 
         const appliedCouponCode = req.body.couponCode;
-        if(appliedCouponCode){
-            const Coupon = await coupon.findOne({code : appliedCouponCode})
-            if(coupon && coupon.status && coupon.expiryDate > Date.now()){
-                if (coupon.user.includes(session) || coupon.maxUsers <= coupon.user.length){
-                    return res.status(400).json({ message:"Coupon has been used or exceeded maximum usage limit"})
+        if (appliedCouponCode) {
+            const Coupon = await coupon.findOne({ code: appliedCouponCode });
+            if (coupon && coupon.status && coupon.expiryDate > Date.now()) {
+                if (coupon.user.includes(session) || coupon.maxUsers <= coupon.user.length) {
+                    return res.status(400).json({ message: "Coupon has been used or exceeded maximum usage limit" });
                 }
-                if(coupon.discountType === 'percentage'){
-                    couponDiscount = totalAfterFloweringPlantDiscount * (coupon.discountAmount / 100)
-                }else if (coupon.discountType === 'fixed'){
-                    couponDiscount = Math.min(coupon.discountAmount,coupon.maxDiscountAmount || Infinity)
+                if (coupon.discountType === 'percentage') {
+                    couponDiscount = totalAfterFloweringPlantDiscount * (coupon.discountAmount / 100);
+                } else if (coupon.discountType === 'fixed') {
+                    couponDiscount = Math.min(coupon.discountAmount, coupon.maxDiscountAmount || Infinity);
                 }
                 await coupon.updateOne(
                     { code: appliedCouponCode },
@@ -77,27 +89,26 @@ const getCheckout = async function (req, res) {
         }
 
         const finalTotalAmount = totalAfterFloweringPlantDiscount - couponDiscount;
-        
-         const addressdata = await address.findOne({ user: session });
+        const addressdata = await address.findOne({ user: session });
 
         res.render('checkout', {
             session,
             userData,
-            Total:finalTotalAmount,
+            Total: finalTotalAmount,
             addressdata: addressdata || {},
             products: cartData.products,
             snakePlantDiscount,
             floweringPlantsDiscount,
             couponDiscount,
             availableCoupons
-
-
-
         });
+
     } catch (error) {
         console.log(error);
+        res.status(500).send("An error occurred while processing your request.");
     }
 };
+
 
 async function recordWalletTransaction(userId , transactionType , amount , description){
     try{

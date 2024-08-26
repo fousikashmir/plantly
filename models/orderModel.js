@@ -21,7 +21,7 @@ const orderSchema = new mongoose.Schema({
 
 }],
 user:{type:String},
-userId:{type:String},
+userId:{type:mongoose.Types.ObjectId},
 paymentMethod:{type:String},
 product:[{
     productId:{

@@ -84,7 +84,7 @@ h4 {
                         
                         <div class="col-md-12 form-group">
                             <button type="submit" value="submit"
-                                class="button button-register w-100">submit</button>
+                                class="button button-register w-100" id="submit-button">submit</button>
                         </div>
                         <p style="color:rgb(8, 8, 8);" id="countdown-timer">OTP will expire in <span id="countdown">30</span> seconds.</p>
                     </form>
@@ -102,34 +102,66 @@ h4 {
 
 
 <script>
-    function startTimer(duration, display) {
-      var timer = duration, minutes, seconds;
-      setInterval(function () {
-          minutes = parseInt(timer / 60, 10)
-          seconds = parseInt(timer % 60, 10);
-  
+
+var remainingTime = 30; 
+var timerInterval;
+    function startTimer(display) {
+     
+      if (timerInterval) clearInterval(timerInterval)
+      timerInterval = setInterval(function () {
+        var minutes = Math.floor(remainingTime / 60);
+        var seconds = remainingTime % 60;
+
           minutes = minutes < 10 ? "0" + minutes : minutes;
           seconds = seconds < 10 ? "0" + seconds : seconds;
   
           display.textContent = minutes + ":" + seconds;
   
-          if (--timer < 0) {
-              timer = duration;
+          if (--remainingTime < 0) {
+            clearInterval(timerInterval);
+            countdownExpired();
           }
+          
       }, 1000);
   }
   
-  var countdown = document.getElementById("countdown");
-  var countdownTimer = document.getElementById("countdown-timer");
   
-  startTimer(30, countdown);
-  // Update timer element and display message when OTP expires
+ 
+
   function countdownExpired() {
+    var countdownTimer = document.getElementById("countdown");
     countdownTimer.innerHTML = 'OTP has expired. Resend the OTP <a href="/resend-otp">here</a>.';
-  
   }
+
+  // Function to initialize or restart the timer
+  function initializeOrResumeTimer() {
+    var countdown = document.getElementById("countdown");
+    startTimer( countdown);
+  }
+
+ 
   
-  setTimeout(countdownExpired, 30000);
+
+document.getElementById("submit-button").addEventListener("click", function(event) {
+    
+   
+    var otpInput = document.getElementById("otp").value;
+
+if (otpInput.trim() === "") {  // Check if OTP input is empty
+    event.preventDefault(); // Prevent form submission if no OTP is entered
+    // Timer continues from where it left off without restarting
+    if (!timerInterval) {  // Only restart the timer if it's not already running
+            initializeOrResumeTimer(); 
+        }
+} else {
+    // Proceed with form submission, do not restart the timer
+    clearInterval(timerInterval); // Stop the timer if the form is being submitted
+}
+});
+initializeOrResumeTimer();
+
+  
+  
   </script>
 
 </body>

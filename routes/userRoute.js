@@ -68,15 +68,14 @@ user_route.get('/user-logout',auth.isLogin,homeController.userLogout)
 
 
 //get product page
-user_route.get('/product/:id',prodController.getProductPage)
+user_route.get('/product',prodController.getProductPage)
 
 //cart
 user_route.get('/cart',cartController.getCart) 
 user_route.post('/addToCart',cartController.addToCart)
-user_route.get('/removeproduct/:id',auth.isLogin,cartController.removeProduct)
-//ajx
+
 user_route.patch('/cartqntyincrease',auth.isLogin,cartController.cartQuantityIncrease,cartController.totalProductPrice)
-user_route.delete('/removeproduct/:id',auth.isLogin,cartController.postRemoveProduct)
+user_route.delete('/removeproduct',auth.isLogin,cartController.postRemoveProduct)
 
 //profile
 user_route.get('/profile',profileController.getProfile)

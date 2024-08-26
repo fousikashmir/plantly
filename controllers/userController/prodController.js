@@ -6,15 +6,14 @@ const getProductPage = async (req, res) => {
     try {
         const session = req.session.user_id
         const userData = await users.findOne({ _id: session})
-        const id = req.params.id
+        const id = req.query.id
         const product = await products.findById(id)
         console.log(product)
-        if (session) {
-            res.render('product', { userData, session, product });
+        if (!product) {
+            return res.status(404).send('Product not found');
         }
-        else {
-            res.render('product', { userData, session, product })
-        }
+
+        res.render('product', { userData, session, product });
     } catch (error) {
         console.log(error);
     }

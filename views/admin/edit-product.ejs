@@ -39,16 +39,19 @@
                         </div>
 
                         <div class="form-floating mb-3">
+                            <label for="floatingSelect">Select category</label>
+                        
                             <select name="category" style="background-color:rgb(58,133,169);" class="form-select" id="floatingSelect"
                                 aria-label="Floating label select example">
-                                <% if(categoryData.length> 0) {
-                                    for(let i=0; i < categoryData.length; i++) { %>
+                                <% if(categoryData.length> 0) { %>
+                                   <% for(let i=0; i < categoryData.length; i++) { %>
                                         <option value="<%= categoryData[i].name %>" style="background-color:rgb(58,133,169);">
                                             <%= categoryData[i].name %>
                                         </option>
-                                    <% } } %>
+                                    <% } %>
+                                    <% } %>
                             </select>
-                            <label for="floatingSelect">Select category</label>
+                            
                         </div>
 
                         <div class="form-group">
@@ -64,7 +67,7 @@
                                         <img height="100px" src="/productimages/<%=productData.image[index]%>" alt="" width="100px">
                                         <div style="padding-left: 1em;">
                                             <button type="button" class="btn btn-danger btn-sm"
-                                                onclick="deletePhoto('<%=index%>','<%=productData._id%>')">Remove</button>
+                                                onclick="deletePhoto(event)">Remove</button>
                                         </div>
                                     </div>
                                 <%})%>
@@ -80,53 +83,13 @@
                             <input type="file" multiple name="image" class="form-control" id="input-image" onchange="previewImages(event)">
 
                         </div>
-                        <script>
-                            function previewImages(event) {
-                                const input = event.target;
-                                const previewContainer = document.getElementById('image-preview');
-                                previewContainer.innerHTML = ''; // Clear previous previews
-                            
-                                if (input.files) {
-                                    for (let i = 0; i < input.files.length; i++) {
-                                        const reader = new FileReader();
-                                        reader.onload = function (e) {
-                                            // Create a container for each image and button
-                                            const container = document.createElement('div');
-                                            container.classList.add('image-container');
-                            
-                                            // Create the image element
-                                            const imgElement = document.createElement('img');
-                                            imgElement.src = e.target.result;
-                                            imgElement.classList.add('preview-image');
-                                            imgElement.style.width = '90px'; // Set the desired width
-                                            imgElement.style.height = '100px';
-                            
-                                            // Create the remove button
-                                            const removeButton = document.createElement('button');
-                                            removeButton.innerText = 'Remove';
-                                            removeButton.classList.add('remove-button');
-                                            removeButton.onclick = function() {
-                                                container.remove(); // Remove the container when the button is clicked
-                                            };
-                            
-                                            // Append elements to the container
-                                            container.appendChild(imgElement);
-                                            container.appendChild(removeButton);
-                            
-                                            // Append the container to the preview container
-                                            previewContainer.appendChild(container);
-                                        };
-                                        reader.readAsDataURL(input.files[i]);
-                                    }
-                                }
-                            }
-                            </script>
+
                             
                         <div class="form-group">
                             <label for="input-stock">Select stock</label>
                             <input type="number" name="stock" class="form-control" id="input-stock" required value="<%=productData.stock%>">
-                            <div class="d-none" id="stock_error" style="color: red;">Stock must be a positive number</div>
-                            <div class="d-none" id="negative_stock_warning" style="color: red;">Warning: Negative stock entered</div>
+                            <div class="d-none" id="stock_error" style="color: red;"></div>
+                            <div class="d-none" id="negative_stock_warning" style="color: red;"></div>
                         </div>
 
                         
@@ -136,6 +99,76 @@
                             <button type="button" onclick="validateForm()" class="btn btn-light px-5"><i class="icon-lock"></i> Update</button>
                         </div>
                     </form>
+
+                    <script>
+                        function previewImages(event) {
+                            const input = event.target;
+                            const previewContainer = document.getElementById('image-preview');
+                            previewContainer.innerHTML = ''; // Clear previous previews
+                        
+                            if (input.files) {
+                                for (let i = 0; i < input.files.length; i++) {
+                                    const reader = new FileReader();
+                                    reader.onload = function (e) {
+                                        // Create a container for each image and button
+                                        const container = document.createElement('div');
+                                        container.classList.add('image-container');
+                        
+                                        // Create the image element
+                                        const imgElement = document.createElement('img');
+                                        imgElement.src = e.target.result;
+                                        imgElement.classList.add('preview-image');
+                                        imgElement.style.width = '90px'; // Set the desired width
+                                        imgElement.style.height = '100px';
+                        
+                                        // Create the remove button
+                                        const removeButton = document.createElement('button');
+                                        removeButton.innerText = 'Remove';
+                                        removeButton.classList.add('remove-button');
+                                        removeButton.onclick = deletePhoto;
+                                        // Append elements to the container
+                                        container.appendChild(imgElement);
+                                        container.appendChild(removeButton);
+                        
+                                        // Append the container to the preview container
+                                        previewContainer.appendChild(container);
+                                    };
+                                    reader.readAsDataURL(input.files[i]);
+                                }
+                            }
+                        }
+
+                        function deletePhoto(event) {
+                                const button = event.target;
+                                const container = button.closest('.image-container');
+                                const index = container.getAttribute('data-index');
+                                const id = container.getAttribute('data-id');
+                                const type = container.getAttribute('data-type');
+
+                                if (type === 'existing') {
+                                    // Delete existing image from the server
+                                    fetch('/admin/delete-image', {
+                                        method: 'POST',
+                                        headers: {
+                                            'Content-Type': 'application/json',
+                                        },
+                                        body: JSON.stringify({ position: index, id: id }),
+                                    })
+                                    .then(response => response.json())
+                                    .then(data => {
+                                        if (data.success) {
+                                            container.remove(); // Remove the image from the UI
+                                        } else {
+                                            alert('Failed to delete image');
+                                        }
+                                    });
+                                } else if (type === 'preview') {
+                                    // Remove preview image
+                                    container.remove();
+                                }
+                            }
+
+                        </script>
 
                     <script>
                         function validateForm() {

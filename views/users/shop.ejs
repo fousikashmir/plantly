@@ -73,40 +73,47 @@
                     </div>
                 </div>
                 <div class="row">
-                    <% if(productData.length>0){
-                        for(let i=0;i < productData.length;i++){ %>
+
+
+
+
+                    <% if(productData.length>0){ %>
+                       <% productData.forEach(product => { %>
                             <div class="col-lg-4 col-md-6 col-sm-6">
                                 <div class="product__item">
-                                    <div class="product__item__pic set-bg"
-                                        data-setbg="../productimages/<%=productData[i].image[0]%>">
+                                    <div class="product__item__pic">
+                                        <img src="../productimages/<%=product.image[0] %>">
                                         <ul class="product__item__pic__hover">
-                                            <li><a href="/product?id=<%= productData[i]._id%>"><i
+                                            <li><a href="/product?id=<%= product._id%>"><i
                                                         class="fa fa-eye view-btn"></i></a></li>
                                                         
-                                            <li><a href='#' onclick="show('<%-productData[i]._id%>')"><i
+                                            <li><a href='#' onclick="show('<%-product._id%>')"><i
                                                         class="fa fa-shopping-cart"></i></a></li>
-                                            <li><a onclick="addtoWishlist('<%-productData[i]._id%>')"><i
+                                            <li><a onclick="addtoWishlist('<%-product._id%>')"><i
                                                         class="fa fa-heart love-btn"></i></a></li>
                                         </ul>
                                     </div>
                                     <div class="product__item__text">
                                         <h6><a href="#">
-                                                <%=productData[i].name %>
+                                                <%=product.name %>
                                             </a></h6>
                                         <h5>
-                                          ₹ <%=productData[i].price %>
+                                          ₹ <%=product.price %>
                                         </h5>
                                     </div>
                                 </div>
                             </div>
-                            <% }
-                } else { %>
+            
+                            <% }) %>
+               <% } else { %>
                    
                     <div class="col-md-12">
                         <p style="color: #563f03; margin-left: 30%;margin-top: 10%;font-size: x-large;"  >No Products Found </p>
                     </div>
                 <% } %>
-                    </div>
+                </div>
+                
+                    
                 </div>
                  
             </div>

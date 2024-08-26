@@ -94,8 +94,8 @@ SubmitButton.setAttribute('disabled','disabled')
 }
 
 function validateName(){
-let name = document.getElementById('name').value;
-const nameRegex =  /^[A-Za-z\s]+$/;
+let name = document.getElementById('name').value.trim();
+const nameRegex =   /^[A-Za-z]+(?:\s[A-Za-z]+)*$/;
 if(!name){
 username=false
 document.getElementById('nameError').innerText = "name is required"

@@ -43,7 +43,7 @@ const getSingleOrderView = async (req, res) => {
         const userData = await User.findOne({ _id: req.session.user_id })
         const id = req.query.id
         const session = req.session.user_id
-        const orderData = await order.findById(id).populate("product.productId")
+        const orderData = await order.findById({_id:id}).populate("product.productId")
        
         const product = orderData.product
        

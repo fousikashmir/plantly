@@ -54,6 +54,8 @@ const getAdminPanel = async (req, res) => {
         ]);
 
         const payment = await order.aggregate([{ $group: { _id: "$paymentMethod", totalPayment: { $count: {} } } }]);
+        console.log("Pay",payment)
+        
 
         let sales = [];
         var date = new Date();
@@ -75,24 +77,14 @@ const getAdminPanel = async (req, res) => {
             { $sort: { _id: 1 } }
         ]);
 
-        for (let i = 1; i <= 12; i++) {
-            let result = true;
-            for (let k = 0; k < salesByYear.length; k++) {
-                result = false;
-                if (salesByYear[k]._id == i) {
-                    sales.push(salesByYear[k])
-                    break;
-                } else {
-                    result = true
-                }
-            }
-            if (result) sales.push({ _id: i, total: 0 });
-        }
-        let salesData = [];
-        for (let i = 0; i < sales.length; i++) {
-            salesData.push(sales[i].total);
-        }
-        // console.log(salesData);
+        let salesData = Array(12).fill(0);
+        salesByYear.forEach(sale => {
+        salesData[sale._id - 1] = sale.total;
+});
+
+
+       
+        console.log(salesData);
 
         res.render('admin-panel', { total, user_count, order_count, product_count, payment, month: salesData })
     } catch (error) {
@@ -115,38 +107,57 @@ const parseDateMiddleware = (req, res, next) => {
 
  const getSalesReport = async (req, res) => {
     try {
-        let from = req.query.from ? moment.utc(req.query.from) : "ALL";
-        let to = req.query.to ? moment.utc(req.query.to) : "ALL";
+        const page = parseInt(req.query.page) || 1;
+        const limit = 10;
+
+
+        let from = req.query.from;
+        let to = req.query.to;
+
+        if (from && moment(from, moment.ISO_8601, true).isValid()) {
+            from = moment.utc(from).startOf('day').toDate();
+        } else {
+            from = "ALL";
+        }
+
+        if (to && moment(to, moment.ISO_8601, true).isValid()) {
+            to = moment.utc(to).endOf('day').toDate();
+        } else {
+            to = "ALL";
+        }
+ 
+        const matchConditions = {
+            status: { $nin: ["cancelled", "returned"] }
+        };
 
         if (from !== "ALL" && to !== "ALL") {
-            const orderdetails = await order.aggregate([
-                {
-                    $match: {
-                        date: {
-                            $gte: new Date(from),
-                            $lte: new Date(to.endOf("day"))
-                        },
-                        status: {
-                            $nin: ["cancelled", "returned"]
-                        }
-                    }
-                }
-            ]);
-            req.session.Orderdtls = orderdetails
-            res.render("sales-report", { message: orderdetails, from, to });
-        } else {
-            const orderdetails = await order.find({
-                status: { $nin: ["cancelled", "returned"] }
-            });
+            matchConditions.date = {
+                $gte: from,
+                $lte: to
+            };
+        }
+
+        const totalCount = await order.countDocuments(matchConditions);
+        const totalPages = Math.ceil(totalCount / limit);
+
+          
+        const orderdetails = await order.find(matchConditions)
+        .skip((page - 1) * limit)
+        .limit(limit)
+        .sort({ date: -1 });
             // console.log(orderdetails);
             req.session.Orderdtls = orderdetails
-            res.render('sales-report', { message: orderdetails, from, to });
-
+            res.render("sales-report", {
+                message: orderdetails,
+                from: req.query.from,
+                to:req.query.to,
+                currentPage: page,
+                totalPages
+            });
+        } catch (error) {
+            console.log(error);
         }
-    } catch (error) {
-        console.log(error);
-    }
-};
+    };
 
 
 

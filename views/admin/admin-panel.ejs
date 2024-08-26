@@ -170,7 +170,7 @@
               <input type="hidden" value="<%= pay.totalPayment %>" id="COD">
               <% } else if (pay._id=='online' ) { %>
                 <input type="hidden" value="<%= pay.totalPayment %>" id="online">
-                <% } else { %>
+                <% }  else if (pay._id=='Wallet' )  { %>
                   <input type="hidden" value="<%= pay.totalPayment %>" id="Wallet">
                   <% } %>
                     <% }) %>
@@ -180,30 +180,30 @@
                       <div class="table-responsive">
                         <table class="table align-items-center">
                           <tbody>
-                            <tr>
+                          
                               <% payment.forEach((pay)=> { %>
+                                <tr>
                                 <% if (pay._id=='COD' ) { %>
                                   <td><i class="fa fa-circle text-white mr-2"></i>COD</td>
                                   <td>
                                     <%= pay.totalPayment %>
                                   </td>
-                            </tr>
-                            <tr>
+                            
                               <% } else if (pay._id=='online' ) { %>
                                 <td><i class="fa fa-circle text-light-1 mr-2"></i>Online</td>
                                 <td>
                                   <%= pay.totalPayment %>
                                 </td>
-                            </tr>
-                            <tr>
-                              <% } else { %>
+                           
+                              <% } else if (pay._id=='Wallet' ) { %>
                                 <td><i class="fa fa-circle text-light-2 mr-2"></i>Wallet Only</td>
                                 <td>
                                   <%= pay.totalPayment %>
                                 </td>
                                 <% } %>
+                              </tr>
                                   <% }) %>
-                            </tr>
+                            
 
                             <tr>
                               <td><i class="fa fa-check text-light-2 mr-2"></i>When only wallet is utilised</td>
@@ -222,11 +222,12 @@
 
   </div>
   <!-- End container-fluid-->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+ 
+
 
   <script>
 
-    $(function () {
+$(document).ready(function() {
       "use strict";
 
       // chart 2

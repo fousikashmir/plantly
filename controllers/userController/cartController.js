@@ -80,6 +80,8 @@ const addToCart = async (req, res) => {
             const cartData = await cart.findOne({userId:session}).populate("products.productId")
             console.log(cartData,'cartdata')
 
+           
+
 
             if(cartData){
                 if(cartData.products.length>0){
@@ -89,6 +91,8 @@ const addToCart = async (req, res) => {
                     let outOfStockProducts = []
                     for(let i=0;i<products.length;i++){
                         const product = products[i].productId
+
+                        if(product){
                         const productStock = product.stock
                         const cartQuantity = products[i].quantity
                         const productPrice = products[i].productPrice;
@@ -104,10 +108,17 @@ const addToCart = async (req, res) => {
                         }else{
                             outOfStockProducts.push(product._id)
                         }
+                        }else {
+                            // Handle null productId, e.g., remove it from the cart or notify the user
+                            console.log(`Product with ID ${products[i]._id} is missing from the database.`);
+                            outOfStockProducts.push(products[i]._id);
+                        }
+    
                     }
                     console.log(Total)
                     const userCartId = userData._id
-                    res.render('cart',{userData,session,Total,userCartId,products,outOfStockProducts})
+                    res.render('cart',{userData,session,Total,userCartId,products,
+                        outOfStockProducts})
                 }else{
                     res.render('cartEmpty',{session,userData,message:"No product added"})
                 }
@@ -135,9 +146,10 @@ const addToCart = async (req, res) => {
                 return res.status(400).json({ success: false, message: 'Stock limit will be exceeded' });
             }
     
-            if ((count == -1) && (quantity == 1)) {
+            if ((count === -1) && (quantity === 1)) {
                 res.json({ remove: true })
-            } else {
+            
+        }else {
                 await cart.updateOne({ userId: req.session.user_id, "products.productId": proId }, { $inc: { "products.$.quantity": count } });
             }
             next();
@@ -183,10 +195,10 @@ const addToCart = async (req, res) => {
 
     const postRemoveProduct = async(req,res)=>{
      try{
-             const productid = req.params.id
-             console.log(productid)
+             const proId = req.query.id
+             console.log(proId)
              const session = req.session.user_id
-             const result = await cart.findOneAndUpdate({userId:session},{$pull:{products:{productId:productid}}})
+             const result = await cart.findOneAndUpdate({userId:session},{$pull:{products:{productId:proId}}})
              console.log(result)
              res.json({remove:true})
 
@@ -195,19 +207,7 @@ const addToCart = async (req, res) => {
         }
      }
 
-    const removeProduct = async(req,res)=>{
-        try{
-            
-            const proId = req.params.id
-            
-            const session = req.session.user_id
-            await cart.findOneAndUpdate({user_id:session},{$pull:{products:{productId:proId}}})
-            res.json({ success: true })
-
-        }catch(error){
-            console.log(error.message)
-        }
-    }
+    
     
 
     
@@ -218,6 +218,5 @@ module.exports = {
     getCart,
     cartQuantityIncrease,
     totalProductPrice,
-    postRemoveProduct,
-    removeProduct
+    postRemoveProduct
 }

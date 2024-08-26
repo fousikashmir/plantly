@@ -38,11 +38,12 @@
                     </tr>
                   </thead>
                   <tbody>
-                    <% if (message.length> 0) { %>
-                      <% for (let i = message.length - 1; i >= 0; i--) { %>                        <tr>
-                        <th scope="row">
-                          <%= message.length - i %>
-                          </th>
+                    <% if (message.length > 0) { %>
+                    <% for (let i = 0; i < message.length; i++) { %>
+                      <tr>
+                          <th scope="row"><%= (currentPage - 1) * 10 + i + 1 %></th>
+                    
+                          
                           <td>
                             <%= message[i].user %>
                           </td>
@@ -68,11 +69,52 @@
                             <% } %>
                   </tbody>
                 </table>
+
+                
               </div>
+
+              <nav aria-label="navigation">
+                <ul class="pagination justify-content-end mt-50">
+                    <% if (currentPage > 1) { %>
+                        <li class="page-item">
+                            <a class="page-link" href="?from=<%= from %>&to=<%= to %>&page=<%= currentPage - 1 %>"
+                                style="display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; 
+                                background-color:#563f03; color: #fff; text-align: center; margin: 5px; border-radius: 5px; 
+                                cursor: pointer; text-decoration: none;">
+                                Prev
+                            </a>
+                        </li>
+                    <% } %>
+
+                    <% for (let j = 1; j <= totalPages; j++) { %>
+                        <li class="page-item <% if (j === currentPage) { %>active<% } %>">
+                            <a class="page-link" href="?from=<%= from %>&to=<%= to %>&page=<%= j %>"
+                                style="display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; 
+                                background-color:#563f03; color: #fff; text-align: center; margin: 5px; border-radius: 5px;
+                                 cursor: pointer; text-decoration: none;">
+                                <%= j %>
+                            </a>
+                        </li>
+                    <% } %>
+
+                    <% if (currentPage < totalPages) { %>
+                        <li class="page-item">
+                            <a class="page-link" href="?from=<%= from %>&to=<%= to %>&page=<%= currentPage + 1 %>"
+                                style="display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; 
+                                background-color:#563f03; color: #fff; text-align: center; margin: 5px; border-radius: 5px; 
+                                cursor: pointer; text-decoration: none;">
+                                Next
+                            </a>
+                        </li>
+                    <% } %>
+                </ul>
+            </nav>
             </div>
           </div>
         </div>
       </div><!--End Row-->
+
+     
       <script>
 
         function printPage() {
@@ -80,3 +122,5 @@
         }
     
       </script>
+      </div>
+    </div>
