@@ -5,7 +5,11 @@ const bcrypt = require('bcrypt')
 
 const getLogin = async(req,res)=>{
     try{
-        res.render('login')
+        const message = req.session.successMessage;
+    
+    
+    req.session.successMessage = null;
+        res.render('login',{message:message})
     }catch(error){
         console.log(error.message)
     }

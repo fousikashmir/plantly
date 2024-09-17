@@ -20,93 +20,143 @@
                                         <th scope="col">Amount</th>
                                         <th scope="col">Paid</th>
                                         <th scope="col">Payment Method</th>
-                                        <th scope="col"></th>
+                                        <th scope="col">Details</Details></th>
                                         <th scope="col">Status</th>
                                         <th scope="col">Action</th>
                                         
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <% if (message.length> 0) { %>
-                                        <% for (let i = message.length - 1; i >= 0; i--) { %>                        <tr>
-                                            <th scope="row">
-                                              <%= message.length - i %>
-                                            </th>
-                                             
-
-                                                <td>
-
-                                                    <%= message[i].date.toISOString().substring(0,10) %>
-                                                </td>
-                                                
-                                                 
-                                                <td>
-                                                    <%= message[i].totalAmount %>
-                                                </td>
-                                               
-                                                <td>
-                                                    <%= message[i].paid %>
-                                                </td>
-                                                <td>
-                                                    <%= message[i].paymentMethod %>
-                                                </td>
-                                                <td>
-                                                    <a href="/singleorderview?id=<%= message[i]._id %>"> View Details</a>
-                                                   
-                                                </td>
-                                                <% if (message[i].status=='placed' ) { %>
-                                                    <td>Placed</td>
-                                                    <td><a style="color:rgb(228, 19, 19);"
-                                                            href="/editorder?id=<%=message[i]._id%>">Cancel</a>
-                                                    </td>
-                                                <% } %>
-
-                                                <% if (message[i].status=='req-for-cancellation' ) { %>
-                                                    <td>Requested for cancellation</td>
-                                                    <td>-</td>
-                                                <% } %>
-
-                                                <% if (message[i].status=='cancelled' ) { %>
-                                                    <td>cancelled</td>
-                                                    <td>-</td>
-                                                <% } %>
-
-                                                <% if (message[i].status=='delivered' ) { %>
-                                                    <td>Delivered</td>
-                                                    <td><a style="color:rgb(228, 19, 19);"
-                                                        href="/editorder?id=<%=message[i]._id%>">Return</a>
-                                                </td>
-                                                <% } %>
-
-                                                <% if (message[i].status=='req-for-return' ) { %>
-                                                    <td>Requested for return</td>
-                                                    <td>-</td>
-                                                <% } %>
-
-                                                <% if (message[i].status=='returned' ) { %>
-                                                    <td>Returned</td>
-                                                    <td>-</td>
-                                                <% } %>
-
-                                            </tr>
+                                    <% if (message.length > 0) { %>
+                                      <% for (let i = message.length - 1; i >= 0; i--) { %>
+                                        <tr>
+                                          <th scope="row">
+                                            <%= message.length - i %>
+                                          </th>
+                                  
+                                          <td>
+                                            <%= message[i].date.toISOString().substring(0,10) %>
+                                          </td>
+                                  
+                                          <td>
+                                            <%= message[i].totalAmount %>
+                                          </td>
+                                  
+                                          <td>
+                                            <%= message[i].paid %>
+                                          </td>
+                                  
+                                          <td>
+                                            <%= message[i].paymentMethod %>
+                                          </td>
+                                  
+                                          <td>
+                                            <a href="/singleorderview?id=<%= message[i]._id %>">View Details</a>
+                                          </td>
+                                  
+                                          <!-- Status Column -->
+                                          <td id="status-<%= message[i]._id %>">
+                                            <% if (message[i].status == 'Placed') { %>
+                                              Placed
+                                            <% } else if (message[i].status == 'cancelled') { %>
+                                              Cancelled
+                                            <% } else if (message[i].status == 'Delivered') { %>
+                                              Delivered
+                                            <% } else if (message[i].status == 'req-for-return') { %>
+                                              Requested for return
+                                            <% } else if (message[i].status == 'returned') { %>
+                                              Returned
                                             <% } %>
-                                                <% } else { %>
-                                                    <tr>
-                                                        <td colspan="3">Orders not found</td>
-                                                    </tr>
-                                                    <% } %>
-                                </tbody>
+                                          </td>
+                                  
+                                          <!-- Action Column -->
+                                          <td id="action-<%= message[i]._id %>">
+                                            <% if (message[i].status == 'Placed') { %>
+                                              <a style="color:rgb(228, 19, 19);" href="javascript:void(0);" 
+                                                data-bs-toggle="modal" onclick="showCancelModal('<%= message[i]._id %>')">Cancel</a>
+                                            <% } else if (message[i].status == 'canceled By Admin' || message[i].status == 'canceled By User') { %>
+                                              <button type="button" class="view disabled" aria-disabled="true">Order Cancelled</button>
+                                             <% } %>
+                                             <% if (message[i].status == 'Delivered') { %>
+                                              <a href="javascript:void(0);" class="view" onclick="showReturnModal('<%= message[i]._id %>')">Return Order</a>
+                                              <% } else if(message[i].status == "Return Pending" || message[i].status == "Return Completed" || message[i].status =="Return Rejected") {%>
+                                                 <a href="javascript:void(0);" class="view"><%=message[i].status%></a>
+                                              <% } %>   
+                                          </td>
+                                        </tr>
+                                      <% } %>
+                                    <% } else { %>
+                                      <tr>
+                                        <td colspan="3">Orders not found</td>
+                                      </tr>
+                                    <% } %>
+                                  </tbody>
+                                  
                             </table>
                         </div>
                     </div>
                 </div>
             </div>
             <div style="margin-top: 50px;margin-bottom: 50px;margin-left: 45%;" >
-                <button style="background-color: rgba(192, 170, 228, 0.788);">
+                <button class="primary-btn cart-btn">
                 <a href="/shop">CONTINUE SHOPPING</a></button>
             </div>
         </div><!--End Row-->
     </div>
+
+    <div class="modal fade" id="cancelModal" tabindex="-1" role="dialog" aria-labelledby="cancelModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="cancelModalLabel">Cancel Order</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="cancelOrderForm" action="/cancelOrder" method="POST">
+                        <input type="hidden" id="cancelOrderId" name="orderId" value="">
+                        <div class="form-group">
+                            <label for="cancelReason">Reason for Cancellation</label>
+                            <textarea class="form-control" id="cancelReason" name="cancelReason" rows="3" required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-danger">Submit Cancellation Request</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="modal fade" id="returnModal" tabindex="-1" role="dialog" aria-labelledby="returnModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="returnModalLabel">Return Order</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="returnOrderForm" action="/returnorder" method="POST">
+                        <input type="hidden" id="returnOrderId" name="orderId" value="">
+                        <div class="form-group">
+                            <label for="returnReason">Reason for Return</label>
+                            <textarea class="form-control" id="returnReason" name="reason" rows="3" required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-warning">Submit Return Request</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+   
+    
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/5.1.0/js/bootstrap.bundle.min.js"></script>
+
+    
     <!-- Bootstrap core JavaScript-->
     <script src="js/jquery.min.js"></script>
     <script src="js/popper.min.js"></script>
@@ -119,6 +169,156 @@
 
     <!-- Custom scripts -->
     <script src="js/app-script.js"></script>
+
+    <script>
+        
+  
+  function showCancelModal(orderId) {
+      document.getElementById('cancelOrderId').value = orderId;
+      $('#cancelModal').modal('show');
+  }
+
+  document.getElementById('cancelOrderForm').addEventListener('submit', async (event) => {
+      event.preventDefault(); 
+
+      const formData = new FormData(event.target);
+      const orderId = formData.get('orderId');
+      const cancelReason = formData.get('cancelReason');
+
+      try {
+          
+          const response = await fetch('/cancelOrder', {
+              method: 'POST',
+              headers: {
+                  'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({ orderId, cancelReason })
+          });
+
+          const data = await response.json(); 
+
+          if (response.ok && data.success) {
+              
+              const cancelModalElement = document.getElementById('cancelModal');
+              const cancelModal = bootstrap.Modal.getInstance(cancelModalElement); 
+              cancelModal.hide(); 
+
+              
+              Swal.fire({
+                  title: 'Order Canceled!',
+                  text: 'The order has been canceled.',
+                  icon: 'success',
+                  customClass: {
+                      confirmButton: 'sweetAlert-custom-button'
+                  }
+              }).then(() => {
+                const statusElement = document.getElementById(`status-${orderId}`);
+                const actionElement = document.getElementById(`action-${orderId}`);
+                
+                
+                statusElement.textContent = 'Cancelled';
+
+                
+                actionElement.textContent = 'Order Cancelled';
+            });
+          } else {
+              
+              Swal.fire({
+                  title: 'Error!',
+                  text: data.message || 'There was an error canceling the order.',
+                  icon: 'error',
+                  customClass: {
+                      confirmButton: 'sweetAlert-custom-button'
+                  }
+              });
+          }
+      } catch (error) {
+          console.error('There was a problem with the fetch request:', error);
+          Swal.fire({
+              title: 'Error!',
+              text: 'There was an error canceling the order.',
+              icon: 'error',
+              customClass: {
+                      confirmButton: 'sweetAlert-custom-button'
+                  }
+          });
+      }
+  });
+
+
+
+  function showReturnModal(orderId) {
+    document.getElementById('returnOrderId').value = orderId;
+    $('#returnModal').modal('show');
+}
+
+document.getElementById('returnOrderForm').addEventListener('submit', async (event) => {
+    event.preventDefault(); 
+
+    const formData = new FormData(event.target);
+    const orderId = formData.get('orderId');
+    const returnReason = formData.get('returnReason');
+
+    try {
+        
+        const response = await fetch('/returnorder', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ orderId, returnReason }),
+        });
+
+        const data = await response.json();
+
+        if (response.ok && data.success) {
+            
+            const returnModalElement = document.getElementById('returnModal');
+            const returnModal = bootstrap.Modal.getInstance(returnModalElement); 
+            returnModal.hide();
+            
+            
+            Swal.fire({
+                title: 'Return request sent!',
+                text: 'The order will be returned if the request is accepted.',
+                icon: 'success',
+                customClass: {
+                    confirmButton: 'sweetAlert-custom-button'
+                }
+            }).then(() => {
+                location.reload(); 
+            });
+        } else {
+            Swal.fire({
+                title: 'Error!',
+                text: data.message || 'There was an error returning the order.',
+                icon: 'error',
+                customClass: {
+                    confirmButton: 'sweetAlert-custom-button'
+                }
+            });
+        }
+    } catch (error) {
+        console.error('There was a problem with the fetch request:', error);
+        Swal.fire({
+            title: 'Error!',
+            text: 'There was an error returning the order.',
+            icon: 'error',
+            customClass: {
+                confirmButton: 'sweetAlert-custom-button'
+            }
+        });
+    }
+});
+
+
+  
+  
+  
+
+
+
+    </script>
 
 </body>
 

@@ -170,7 +170,7 @@
               <input type="hidden" value="<%= pay.totalPayment %>" id="COD">
               <% } else if (pay._id=='online' ) { %>
                 <input type="hidden" value="<%= pay.totalPayment %>" id="online">
-                <% }  else if (pay._id=='Wallet' )  { %>
+                <% }  else { %>
                   <input type="hidden" value="<%= pay.totalPayment %>" id="Wallet">
                   <% } %>
                     <% }) %>
@@ -195,7 +195,7 @@
                                   <%= pay.totalPayment %>
                                 </td>
                            
-                              <% } else if (pay._id=='Wallet' ) { %>
+                              <% } else{ %>
                                 <td><i class="fa fa-circle text-light-2 mr-2"></i>Wallet Only</td>
                                 <td>
                                   <%= pay.totalPayment %>

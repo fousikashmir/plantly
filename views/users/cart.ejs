@@ -184,7 +184,14 @@
             let productPrice = parseFloat(price)
 
             if (newQuantity <= 0) {
-            alert("Quantity cannot be less than 1");
+            swal.fire({
+                position : 'center',
+                icon: 'warning',
+                title: 'Quantity cannot be less than 1',
+                showConfirmButton:false,
+                timer:2000
+
+            })
             return;
         }
            

@@ -7,7 +7,7 @@ const productModel = require('../../models/productModel')
 const order = require('../../models/orderModel')
 
 const coupon = require('../../models/couponModel')
-const walletTransactionCollection = require('../../models/walletTransactionModel')
+const walletTransaction = require('../../models/walletTransactionModel')
 const session =require('express-session')
 
 const Razorpay = require('razorpay')
@@ -19,6 +19,23 @@ const instance = new Razorpay({
     key_id : process.env.RAZORPAY_ID_KEY,
     key_secret : process.env.RAZORPAY_SECRET_KEY
 })
+
+async function recordWalletTransaction(userId , transactionType , amount , description,timestamp){
+    try{
+        const transaction = new walletTransaction({
+            userId,
+            transactionType,
+            amount,
+            description,
+            timestamp
+        });
+        await transaction.save();
+        console.log('Wallet transaction recorded succesfully')
+
+    }catch(error){
+        console.log('Error recording wallet transaction',error)
+    }
+} 
 
 const getCheckout = async function (req, res) {
     try {
@@ -42,7 +59,7 @@ const getCheckout = async function (req, res) {
             const currentStock = currentProduct.stock;
 
             if (quantityInCart > currentStock) {
-                // Redirect to cart page with an error message if stock is insufficient
+               
                 return res.status(400).json({
                     message: `The quantity for ${product.name} exceeds the available stock. Please adjust your cart.`
                 });
@@ -88,19 +105,27 @@ const getCheckout = async function (req, res) {
             }
         }
 
-        const finalTotalAmount = totalAfterFloweringPlantDiscount - couponDiscount;
+        const finalTotalAmount = (totalAfterFloweringPlantDiscount - couponDiscount).toFixed(2);
         const addressdata = await address.findOne({ user: session });
+        const walletData = await walletTransaction.findOne({ userId: session });
+        const walletAmount = walletData ? walletData.amount : 0;
+
+        
+        
+        
 
         res.render('checkout', {
             session,
             userData,
-            Total: finalTotalAmount,
+            Total: parseFloat(finalTotalAmount),
             addressdata: addressdata || {},
             products: cartData.products,
-            snakePlantDiscount,
-            floweringPlantsDiscount,
-            couponDiscount,
-            availableCoupons
+             snakePlantDiscount,
+             floweringPlantsDiscount,
+             couponDiscount,
+            availableCoupons,
+            walletAmount
+            
         });
 
     } catch (error) {
@@ -110,85 +135,74 @@ const getCheckout = async function (req, res) {
 };
 
 
-async function recordWalletTransaction(userId , transactionType , amount , description){
-    try{
-        const transaction = new walletTransactionCollection({
-            userId,
-            transactionType,
-            amount,
-            description,
-        });
-        await transaction.save();
-        console.log('Wallet transaction recorded succesfully')
 
-    }catch(error){
-        console.log('Error recording wallet transaction',error)
-    }
-} 
  
 const placeOrder = async (req, res) => {
     try {
         const userData = await users.findOne({ _id: req.session.user_id });
-        
         const session = req.session.user_id;
 
-        const total = await cart.aggregate([
+        
+        const totalResult = await cart.aggregate([
             { $match: { userId: userData._id } },
             { $unwind: "$products" },
             { $project: { productPrice: "$products.productPrice", quantity: "$products.quantity" } },
             { $group: { _id: null, total: { $sum: { $multiply: ["$productPrice", "$quantity"] } } } }
         ]);
-        console.log('Total',total)
 
+        const TotalInitially = totalResult.length > 0 ? totalResult[0].total : 0;
         let discountAmount = req.body.discountAmount || 0;
-
-        const TotalInitially = total.length > 0 ? total[0].total : 0;
-        
-        const Total = TotalInitially - discountAmount;
-
-        const userWalletAmount = userData.wallet;
-
-        let paidAmount;
-        let walletAmountUsed;
-       
-        let walletAmountBalance;
-
-        if (userWalletAmount < TotalInitially) {
-            paidAmount = req.body.amount;
-            walletAmountUsed = TotalInitially - paidAmount
-            console.log('walletAmountUsed',walletAmountUsed) 
-            walletAmountBalance = userWalletAmount - walletAmountUsed;
-        } else {
-            paidAmount = 0;
-            walletAmountUsed = TotalInitially;
-            walletAmountBalance = userWalletAmount - TotalInitially;
-        }
-
-        await users.findOneAndUpdate({ _id: req.session.user_id }, { $set: { wallet: walletAmountBalance } });
-
-        const userId = req.session.user_id;
-        const transactionType = 'debit';
-        const transactionAmount = walletAmountUsed;
-        const transactionDescription = 'Order payment';
-        await recordWalletTransaction(userId, transactionType, transactionAmount, transactionDescription);
+        const Total = (TotalInitially - discountAmount).toFixed(2); 
+        const walletData = await walletTransaction.findOne({userId:req.session.user_id})
+        const userWalletAmount = walletData?walletData.amount.toFixed(2):0
+        console.log(userWalletAmount)
 
         let payment = req.body.payment;
-        let address = req.body.address;
-        let city = req.body.city;
-        let state = req.body.state;
-        let pin = req.body.pin;
-        
+        let paidAmount = 0;
+        let walletAmountUsed = 0;
+        let walletAmount = userWalletAmount;
+        let status = payment === "online" ? "pending" : "placed"; 
 
-        const cartData = await cart.findOne({ userId: req.session.user_id });
-        const products = cartData.products; 
-        console.log('****',products)
+        if (payment === "wallet") {
+            
+           
+            if (userWalletAmount >= Total) {
+                paidAmount = 0;  
+                walletAmountUsed = Total;
+                walletAmount = userWalletAmount - Total;
+                status = "placed"; 
 
-        let status = payment === "online" ? "pending" : "placed";
-
-        if (payment === 'wallet' && Total <= 0) {
-            status = 'delivered';
+                walletData.amount = walletAmount
+                await walletData.save()
+            }else{ 
+                return res.json({ success: false, message: "Not enough balance in the wallet." });
+            }
+        } else if (payment === "online" || payment === "COD") {
+           
+            paidAmount = req.body.amount || Total;  
+            walletAmountUsed = 0;
+            walletAmount = userWalletAmount;
         }
 
+        
+        if (walletAmountUsed > 0) {
+            
+
+            
+            const userId = req.session.user_id;
+            const transactionType = 'debit';
+            const transactionAmount = walletAmountUsed;
+            const transactionDescription = 'Order payment';
+            await recordWalletTransaction(userId, transactionType, transactionAmount, transactionDescription);
+        }
+
+       
+        const address = req.body.address;
+        const city = req.body.city;
+        const state = req.body.state;
+        const pin = req.body.pin;
+        const cartData = await cart.findOne({ userId: req.session.user_id });
+        const products = cartData.products;
 
        
         const newOrder = new order({
@@ -198,22 +212,18 @@ const placeOrder = async (req, res) => {
             userId: userData._id,
             paymentMethod: payment,
             paid: paidAmount,
-            wallet: walletAmountUsed,
+            wallet: walletAmount,
             discount: discountAmount,
             product: products,
             totalAmount: TotalInitially,
             date: Date.now(),
             status: status
         });
-        console.log('NewOrder',newOrder)   
 
         const saveOrder = await newOrder.save();
-        const orderId = saveOrder._id;
 
-        const orderData = await order.findById({ _id: orderId });
-        console.log(orderData)
-        const product = orderData.product;
-
+        
+        const product = saveOrder.product;
         for (let i = 0; i < product.length; i++) {
             const productId = product[i].productId;
             const quantity = product[i].quantity;
@@ -225,20 +235,23 @@ const placeOrder = async (req, res) => {
             }
         }
 
+        
         if (status === "placed") {
-           const result = await cart.deleteOne({ userId: userData._id });
-            console.log('cart delete',result)
+            
+            await cart.deleteOne({ userId: userData._id });
             res.json({ success: true });
         } else {
-            const orderid = saveOrder._id;
-            const totalamount = saveOrder.paid;
+           
+            const orderId = saveOrder._id;
+            const totalAmount = saveOrder.paid;
 
             var options = {
-                amount: totalamount * 100,
+                amount: totalAmount * 100, 
                 currency: "INR",
-                receipt: "" + orderid
+                receipt: "" + orderId
             };
 
+            
             instance.orders.create(options, function (err, order) {
                 res.json({ order });
             });

@@ -21,7 +21,9 @@ const orderSchema = new mongoose.Schema({
 
 }],
 user:{type:String},
-userId:{type:mongoose.Types.ObjectId},
+userId:{type:mongoose.Types.ObjectId,
+    ref:"users"
+},
 paymentMethod:{type:String},
 product:[{
     productId:{
@@ -33,16 +35,45 @@ product:[{
     quantity:{
         type:Number,
         required:true
+    
     },
+    status:{
+        type:String,
+        default:"Placed"
+
+    },
+    cancelReason:{
+        type:String,
+        default:null
+    }
 
 }],
 paid:{type:Number},
-wallet:{type:Number},
 totalAmount:{type:Number},
 date:{type: Date},
 status:{type:String},
-paymentId:{type:String}
+cancelReason:{
+    type:String,
+    default:null
 },
+returnReason:{
+    type:String,
+    default:null
+},
+paymentId:{type:String},
+requests:[{
+    type:{
+        type:String,
+        enum:['cancel','Return'],
+    },
+    
+    reason:String,
+},],
+
+},
+
+
+
 {timestamps:true}
 
 )

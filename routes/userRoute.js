@@ -34,7 +34,7 @@ user_route.use(session({
     secret:config.sessionSecret,
     saveUninitialized:true,
     resave:false,
-    cookie:{maxAge : 600000},
+    cookie:{maxAge : 1000*60*60*24},
 }))
 
 
@@ -102,7 +102,8 @@ user_route.post('/verifyPayment',orderController.verifyOnlinePayment)
 user_route.get('/myorders',orderController.getMyOrders)
 user_route.get('/singleorderview',orderController.getSingleOrderView)
 
-user_route.get('/editorder',orderController.editOrder)
+user_route.post('/cancelOrder',orderController.cancelOrder)
+user_route.post('/returnorder',orderController.returnOrder)
 
 //wishlist
 user_route.get('/wishlist',auth.isLogin,wishListController.getWishList)

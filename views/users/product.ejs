@@ -111,9 +111,69 @@
     </div>
    
 </section>
-<!-- Product Details Section End -->
 
-<!-- Related Product Section Begin -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.3/jquery.min.js"></script>
+
+<script>
+    function show(id) {
+        $.ajax({
+            url: "/addToCart",
+            method: "post",
+            data: {
+                id: id
+            },
+            success: (response) => {
+                if (response.success) {
+                    swal.fire({
+                        position: 'center',
+                        icon: 'success',
+                        title: 'Product added to cart',
+                        showConfirmButton: false,
+                        timer: 1500
+                    });
+                }
+            },
+            error: (xhr) => {
+                const response = xhr.responseJSON;
+                if (xhr.status === 401) {
+                    window.location.href = '/login';
+                } else if (xhr.status === 400) {
+
+                    if (response.message === 'Out of stock') {
+                    swal.fire({
+                        position: 'center',
+                        icon: 'error',
+                        title: 'Product is out of stock',
+                        showConfirmButton: false,
+                        timer: 2000
+                    });
+                } else if (response.message === 'Stock limit exceeded') {
+                    swal.fire({
+                        position: 'center',
+                        icon: 'error',
+                        title: 'Cannot add more items than available stock',
+                        showConfirmButton: false,
+                        timer: 2000
+                    });
+                } else {
+                    
+                    swal.fire({
+                        position: 'center',
+                        icon: 'error',
+                        title: response.message,
+                        showConfirmButton: false,
+                        timer: 2000
+                    });
+                }
+                }
+            }
+        });
+    }
+</script>
+
+
+
+
 
 <style>
     .image-zoom-container{
@@ -131,6 +191,8 @@
     z-index: 1;
     }
 </style>
+
+
 
 
 <%- include('../partials/users/footer.ejs') %>

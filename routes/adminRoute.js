@@ -95,7 +95,10 @@ admin_route.get('/products/unblock',productController.unBlockProduct)
 
 admin_route.get('/orders',ordrController.getOrders)
 admin_route.get('/singleorder',ordrController.getSingleOrder)
-admin_route.get('/editorder',ordrController.editOrder)
+admin_route.post('/cancelOrder',ordrController.cancelOrder)
+admin_route.post('/updateorderstatus',ordrController.updateOrderStatus)
+admin_route.post('/returnadminorder',ordrController.returnOrder)
+
 
 
 admin_route.get('/coupons',couponController.getCouponListPage)

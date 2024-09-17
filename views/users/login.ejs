@@ -1,5 +1,5 @@
 
-
+      
         <%- include('../partials/users/loginheader.ejs') %>
        
     
@@ -8,6 +8,12 @@
             <div class="form login">
                
                 <div class="form-content">
+
+                    <% if (message) { %>
+                        <div class="alert alert-success " style="padding: 20px;">
+                            <%= message %>
+                        </div>
+                    <% } %>
                     
                     <header>Please login now</header>
                     <form action="" method="post">
@@ -83,4 +89,5 @@
         })
     })
     </script>
+
            

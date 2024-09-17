@@ -8,6 +8,26 @@
   #productTable tbody tr:hover {
     background-color: #f97a7a; 
   }
+
+  ul.pagination {
+  display: flex; /* Ensures that the pagination is in a horizontal row */
+  list-style-type: none; /* Removes the bullet points */
+  padding: 0;
+}
+
+ul.pagination li {
+  margin: 0 5px; /* Adds spacing between page numbers */
+}
+
+ul.pagination li a {
+  text-decoration: none;
+  color: black;
+  padding: 8px 16px;
+  background-color: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-radius: 4px;
+}
+
 </style>
 
   <div style="background-color: aliceblue;" class="clearfix"></div>
@@ -26,7 +46,7 @@
                       <th scope="col">#</th>
                       <th scope="col">Name</th>
                       <th scope="col">Order Date</th>
-                      <th scope="col"> </th>
+                      <th scope="col">Details</th>
                        <th scope="col">Payment Method</th>
                       <th scope="col">Amount</th>
                       <th scope="col">Status</th>
@@ -37,68 +57,56 @@
 
                   <tbody>
                     <% if(message.length>0){ %>
-                      <%for(let i=message.length-1;i>=0;i--){ %>
+                      <% message.forEach((order,index) => { %>
                         <tr>
                         <th scope="row">
-                          <%= message.length-i %>
+                          <%= index+1 %>
                         </th>
                         <td>
-                          <a style="color:black;" href="/admin/singleorder?id=<%= message[i]._id %>">
-                            <%= message[i].user %>
+                          <a style="color:black;" href="/admin/singleorder?id=<%= order._id %>">
+                            <%= order.user %>
                           </a>
                         </td>
                         <td>
-                          <%= message[i].date.toISOString(0,10) %>
+                          <%= order.date.toISOString(0,10) %>
                         </td>
                         <td>
-                          <a style="color:black;" href="/admin/singleorder?id=<%= message[i]._id%>">View Detail></a>
+                          <a style="color:black;" href="/admin/singleorder?id=<%= order._id%>">View Detail></a>
                         </td>
                         <td>
-                          <%= message[i].paymentMethod %>
+                          <%= order.paymentMethod %>
                         </td>
                         <td>
-                          <%=message[i].totalAmount %>
+                          <%=order.totalAmount %>
                         </td>
-
-                        <% if(message[i].status=='placed'){ %>
-                          <td>Placed</td>
+                        
                           <td>
-                            <a style="color:rgb(21, 232, 10);"
-                            href="/admin/editorder?id=<%=message[i]._id%>">Delivered</a>
+                            <% if (order.status == "Placed") { %>
+                              <span class="badge rounded-pill alert-warning">Order Placed</span>
+                            <% } else if (order.status == "Shipped") { %>
+                              <span class="badge rounded-pill alert-warning">Order Shipped</span>
+                            <% } else if (order.status == "Delivered") { %>
+                              <span class="badge rounded-pill alert-success">Order Delivered</span>
+                            <% } else if (order.status == "Canceled By Admin" || order.status == "canceled By user" || order.status == "Return Rejected") { %>
+                              <span class="badge rounded-pill alert-danger"><%= order.status %></span>
+                            <% } else if (order.status == "Return Pending") { %>
+                              <span class="badge rounded-pill alert-info">Return Pending</span>
+                            <% } else if (order.status == "Return Completed") { %>
+                              <span class="badge rounded-pill alert-success">Return Completed</span>
+                            <% } %>
+                          
+                        </td>
+                        <td>
+                          <% if (order.status !== 'Canceled By Admin' && order.status !== 'Canceled By User' && order.status !== 'delivered' && order.status !== "Return Completed" && order.status !== 'Return Rejected') { %>
+                            <a href="javascript:void(0)" onclick="cancelOrder('<%= order._id %>', '<%= order.userId %>')" class="btn btn-light rounded btn-sm font-sm">Cancel Order</a>
+                          <% } else { %>
+                            <button class="btn btn-light rounded btn-sm font-sm" disabled>Cancel Order</button>
+                          <% } %>
+                        </td>
+                        
+
+                              <% })%>
                             
-                          </td>
-                          <% } %>
-
-                          <% if (message[i].status=='delivered') { %>
-                          <td>Delivered</td>
-                          <td>-</td>
-                          <% } %>
-
-                          <% if (message[i].status=='req-for-cancellation') { %>
-                            <td>Requested for cancellation</td>
-                            <td><a style="color:rgb(21, 232, 10);" 
-                              href="/admin/editorder?id=<%=message[i]._id%>">Approve</a>
-
-                             </td>
-                             <% } %>
-
-                             <% if (message[i].status=='cancelled'){ %>
-                              <td>cancelled</td>
-                              <td>-</td>
-                              <% } %>
-
-                              <% if (message[i].status=='req-for-return') { %>
-                              <td>Requested for return</td>
-                              <td><a style="color:rgb(8, 241, 35);"
-                              href="/admin/editorder?id=<%=message[i]._id%>">Approve</a></td>
-                              <% } %>
-
-                              <% if (message[i].status=='returned') { %>
-                                <td>Returned</td>
-                                <td>-</td>
-                                <% } %>
-                              </tr>
-                              <% } %>
                               <% }else { %>
                                 <tr>
                                   <td colspan="3">Orders not found</td>
@@ -109,6 +117,86 @@
                           </div>
                         </div>
                       </div>
+
+                      <div>
+                        <ul class="pagination">
+                          <% if (currentPage > 1) { %>
+                            <li class="page-item"><a class="page-link" href="?page=<%= currentPage - 1 %>">Previous</a></li>
+                          <% } %>
+                      
+                          <% for (let i = 1; i <= totalPages; i++) { %>
+                            <li class="page-item <%= currentPage === i ? 'active' : '' %>">
+                              <a class="page-link" href="?page=<%= i %>"><%= i %></a>
+                            </li>
+                          <% } %>
+                      
+                          <% if (currentPage < totalPages) { %>
+                            <li class="page-item"><a class="page-link" href="?page=<%= currentPage + 1 %>">Next</a></li>
+                          <% } %>
+                        </ul>
+                        </div>
+
+                        
+                      <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+
+
+                     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+
+                     <script>
+
+
+async function cancelOrder(orderId, userId) {
+  const result = await Swal.fire({
+    title: 'Are you sure?',
+    text: 'You want to cancel this order?',
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonText: 'Yes, cancel it!',
+    cancelButtonText: 'No'
+  });
+
+  if (result.isConfirmed) {
+    $.ajax({
+      url: '/admin/cancelOrder',
+      type: 'POST',
+      data: JSON.stringify({ orderId, userId }),
+      contentType: 'application/json',
+      success: async function(data) {
+        console.log('Response from server:', data);
+
+        if (data.success) {
+          await Swal.fire(
+            'Order Canceled!',
+            'The order has been canceled.',
+            'success'
+          );
+          location.reload(); // Reload the page to reflect the changes
+        } else {
+          await Swal.fire(
+            'Error!',
+            data.message || 'There was an error canceling the order.',
+            'error'
+          );
+        }
+      },
+      error: async function(xhr, status, error) {
+        console.error('AJAX request error:', error);
+        await Swal.fire(
+          'Error!',
+          'There was an error canceling the order.',
+          'error'
+        );
+      }
+    });
+  }
+}
+
+                        
+  
+                                    
+                      </script>
+                      
 
                       <script>
                         $(document).ready(function() {

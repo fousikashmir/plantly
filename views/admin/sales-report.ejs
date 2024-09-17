@@ -1,5 +1,40 @@
 <%- include('../partials/admin/header.ejs') %>
 
+
+<style>
+  .pagination {
+    display: flex;
+    flex-wrap: nowrap;
+    padding: 0;
+    margin: 0;
+    list-style: none;
+  }
+
+  .pagination .page-item {
+    margin: 0 5px;
+  }
+
+  .pagination .page-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    background-color: #563f03;
+    color: #fff;
+    text-align: center;
+    border-radius: 5px;
+    text-decoration: none;
+    cursor: pointer;
+  }
+
+  .pagination .page-item.active .page-link {
+    background-color: #563f03;
+    color: #fff;
+  }
+</style>
+
+
   <div class="clearfix"></div>
 
   <div class="content-wrapper">
@@ -77,10 +112,7 @@
                 <ul class="pagination justify-content-end mt-50">
                     <% if (currentPage > 1) { %>
                         <li class="page-item">
-                            <a class="page-link" href="?from=<%= from %>&to=<%= to %>&page=<%= currentPage - 1 %>"
-                                style="display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; 
-                                background-color:#563f03; color: #fff; text-align: center; margin: 5px; border-radius: 5px; 
-                                cursor: pointer; text-decoration: none;">
+                            <a class="page-link" href="?from=<%= from %>&to=<%= to %>&page=<%= currentPage - 1 %>">
                                 Prev
                             </a>
                         </li>
@@ -88,10 +120,8 @@
 
                     <% for (let j = 1; j <= totalPages; j++) { %>
                         <li class="page-item <% if (j === currentPage) { %>active<% } %>">
-                            <a class="page-link" href="?from=<%= from %>&to=<%= to %>&page=<%= j %>"
-                                style="display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; 
-                                background-color:#563f03; color: #fff; text-align: center; margin: 5px; border-radius: 5px;
-                                 cursor: pointer; text-decoration: none;">
+                            <a class="page-link" href="?from=<%= from %>&to=<%= to %>&page=<%= j %>">
+                                
                                 <%= j %>
                             </a>
                         </li>
@@ -99,10 +129,7 @@
 
                     <% if (currentPage < totalPages) { %>
                         <li class="page-item">
-                            <a class="page-link" href="?from=<%= from %>&to=<%= to %>&page=<%= currentPage + 1 %>"
-                                style="display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; 
-                                background-color:#563f03; color: #fff; text-align: center; margin: 5px; border-radius: 5px; 
-                                cursor: pointer; text-decoration: none;">
+                            <a class="page-link" href="?from=<%= from %>&to=<%= to %>&page=<%= currentPage + 1 %>">
                                 Next
                             </a>
                         </li>

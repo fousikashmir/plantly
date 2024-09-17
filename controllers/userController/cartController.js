@@ -35,6 +35,11 @@ const addToCart = async (req, res) => {
         if (cartData) {
             const productExist = cartData.products.findIndex(product => product.productId.toString() === productId);
             if (productExist !== -1) {
+
+                const newQuantity = cartData.products[productExist].quantity + 1;
+                if (newQuantity > productStock) {
+                    return res.status(400).json({ success: false, message: 'Stock limit exceeded' });
+                }
                 await cart.updateOne(
                     { userId:userid, "products.productId": productId },
                     { $inc: { "products.$.quantity": 1 } }

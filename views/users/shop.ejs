@@ -20,7 +20,7 @@
                                 <option value="a_z" <%= sortBy === 'a_z' ? 'selected' : '' %>>A-Z</option>
                                 <option value="z_a" <%= sortBy === 'z_a' ? 'selected' : '' %>>Z-A</option>
                               </select>
-              <select name="price" id="price"
+              <select style="margin-left: 50px;"   name="price" id="price"
               onchange="location ='/shop?value='+value+'&category=<%= Category %>&search=<%= Search %>'">
               <% if(price=="High" ){ %>
                   <option value="Low"> Low To High</option>
@@ -46,8 +46,7 @@
                             <% }) %>
                         </ul>
                         <div style="margin-top: 20px; margin-left: 45px;">
-                            <a href="/shop" style="text-decoration: none; color: black;"><span
-                                    class="icon_close"></span> Clear Filter</a>
+                            <a href="/shop" style="text-decoration: none; color: black;"><span>❌</span> Clear Filter</a>
 
                         </div>
 
@@ -86,10 +85,20 @@
                                         <ul class="product__item__pic__hover">
                                             <li><a href="/product?id=<%= product._id%>"><i
                                                         class="fa fa-eye view-btn"></i></a></li>
+
+                                                        <% if(product.stock >0) { %>
                                                         
                                             <li><a href='#' onclick="show('<%-product._id%>')"><i
                                                         class="fa fa-shopping-cart"></i></a></li>
-                                            <li><a onclick="addtoWishlist('<%-product._id%>')"><i
+                                                        <% } else { %>
+                                                            <li>
+                                                                <a href="javascript:void(0)" class="disabled" style="pointer-events: none; opacity: 0.5;">
+                                                                    <i class="fa fa-shopping-cart"></i>
+                                                                </a>
+                                                        
+                                                            </li>
+                                                            <% } %>
+                                            <li><a href="#" onclick="addtoWishlist('<%-product._id%>')"><i
                                                         class="fa fa-heart love-btn"></i></a></li>
                                         </ul>
                                     </div>
@@ -181,10 +190,29 @@
                 }
             },
             error: (xhr) => {
+                const response = xhr.responseJSON;
                 if (xhr.status === 401) {
                     window.location.href = '/login';
                 } else if (xhr.status === 400) {
-                    const response = xhr.responseJSON;
+
+                    if (response.message === 'Out of stock') {
+                    swal.fire({
+                        position: 'center',
+                        icon: 'error',
+                        title: 'Product is out of stock',
+                        showConfirmButton: false,
+                        timer: 2000
+                    });
+                } else if (response.message === 'Stock limit exceeded') {
+                    swal.fire({
+                        position: 'center',
+                        icon: 'error',
+                        title: 'Cannot add more items than available stock',
+                        showConfirmButton: false,
+                        timer: 2000
+                    });
+                } else {
+                    
                     swal.fire({
                         position: 'center',
                         icon: 'error',
@@ -193,6 +221,7 @@
                         timer: 2000
                     });
                 }
+                }
             }
         });
     }
@@ -200,7 +229,7 @@
     function addtoWishlist(id) {
         console.log(id)
         $.ajax({
-            url: '/addtowhishlist',
+            url: '/addtowishlist',
             method: 'post',
             data: {
                 id: id

@@ -7,8 +7,15 @@ const bcrypt = require('bcrypt')
 
 const getCategory = async(req,res)=>{
     try{
-        const categoryDatas = await category.find()
-        res.render('category',{message:categoryDatas})
+        const page = parseInt(req.query.page) || 1
+        const limit = parseInt(req.query.limit) || 10
+        const skip = (page-1) * limit
+        const categoryDatas = await category.find().skip(skip).limit(limit)
+        const totalCategories = await category.countDocuments()
+        res.render('category',{
+            message:categoryDatas,
+        currentPage : page,
+    totalPages : Math.ceil(totalCategories / limit)})
 
     }catch(error){
         console.log(error.message)
@@ -27,8 +34,8 @@ const getAddCategoryPage = async(req,res)=>{
 
 const addCategory = async(req,res)=>{
     try{
-        const newCategory = req.body.category
-        if(newCategory.trim().length==0){
+        const newCategory = req.body.category.trim();
+        if(newCategory.length==0){
             res.render('add-category',{message : 'Enter category name'})
         }
         const categoryExists = await category.findOne({name: new RegExp('^'+ newCategory + '$','i')})

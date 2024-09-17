@@ -85,10 +85,13 @@ const postRegister = async (req, res) => {
     try {
         
         const emailExists = await users.findOne({ email: req.body.email });
+        const mobileExists = await users.findOne({ mobile: req.body.mobile})
 
         if (emailExists) {
             res.render('register', { message: 'Email ID already registered' });
-        } else {
+        } else if (mobileExists){
+            res.render('register',{message:'Mobile number already registered'})
+        }else{
             if (req.body.password == req.body.confirmPassword) {
                 const password = req.body.password.trim();
                 const bcryptedPassword = await securePassword(password);
@@ -152,6 +155,7 @@ const verifyOtp = async(req,res)=>{
         if(userotp == otp){
             const updateInfo = await users.updateOne({email:registerTimeEmail},{$set:{is_verified:1}})
             console.log(updateInfo)
+            req.session.successMessage = 'Successfully registered! Please login.'
             res.redirect('/login')
         }else{
             res.render('otppage',{message:'Entered otp is wrong'})

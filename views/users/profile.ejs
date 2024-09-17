@@ -2,214 +2,218 @@
 <!DOCTYPE html>
 <html lang="en">
 
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Profile and Address Page</title>
-    <style>
-        body {
-            background-color: rgb(246, 216, 216);
-            font-family: 'Arial', sans-serif;
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
 
-        #wrapper {
-            width: 100%;
-            margin: 0 auto;
-            padding: 20px;
-        }
+    
+        <style>
+            .profile-container {
+                display: flex;
+                justify-content: center;
+                margin-top: 20px;
+            }
+    
+            .profile-buttons {
+                display: flex;
+                flex-direction: column;
+                width: 200px;
+                margin-right: 40px;
+            }
+    
+            .profile-buttons button {
+                margin-bottom: 10px;
+                padding: 10px;
+                cursor: pointer;
+                background-color: #4baa26;
+                color: white;
+                border: none;
+                border-radius: 5px;
+                font-size: 16px;
+            }
+    
+            .profile-content {
+                flex-grow: 1;
+                background-color: #f9f9f9;
+                padding: 20px;
+                border-radius: 8px;
+                margin:0 auto;
+                width: 100%; 
+                max-width: 800px;
+                display: none;
+            }
+    
+            .profile-content.active {
+                display: block;
+            }
+    
+            .content-title {
+                font-size: 20px;
+                font-weight: bold;
+                margin-bottom: 10px;
+            }
 
-        .content-wrapper {
-            background-color: #f9f9f9;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            padding: 20px;
-        }
+       
 
-        .card {
-            background-color: rgb(193, 212, 193);
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            padding: 20px;
-            margin-top: 20px;
-        }
-
-        .nav-tabs {
-            border-bottom: 2px solid #ad5353;
-            margin-bottom: 20px;
-        }
-
-        .nav-tabs .nav-link {
-            color: #ad5353;
-            font-weight: bold;
-            border: none;
-            border-radius: 4px;
-        }
-
-        .nav-tabs .nav-link.active {
-            background-color: #ad5353;
-            color: white;
-        }
-
-        .horizontal-address-container {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 20px;
-        }
-
-        .horizontal-address {
-            background-color: white;
-            border: 1px solid #ad5353;
-            border-radius: 8px;
-            padding: 15px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            width: calc(50% - 20px); /* Adjust width as needed */
-            box-sizing: border-box;
-        }
-
-        .horizontal-address button {
-            margin-right: 10px;
-            border: none;
-            border-radius: 4px;
-            padding: 5px 10px;
-            cursor: pointer;
-            font-size: 14px;
-            color: white;
-        }
-
-        .horizontal-address .btn-delete {
-            background-color: brown;
-        }
-
-        .horizontal-address .btn-edit {
-            background-color: blueviolet;
-        }
-
-        .horizontal-address h5 {
-            margin-top: 10px;
-            font-size: 16px;
-            color: #333;
-        }
-
-        .shoping__cart__btns a {
-            display: inline-block;
-            padding: 10px 20px;
-            color: white;
-            background-color: #ad5353;
-            border-radius: 4px;
-            text-decoration: none;
-            font-weight: bold;
-            margin-top: 20px;
-        }
-
-        .shoping__cart__btns a:hover {
-            background-color: #933d3d;
-        }
-
-        button a {
-            color: black;
-            text-decoration: none;
-        }
-
-        button {
-            padding: 10px 20px;
-            border-radius: 4px;
-            border: 2px solid #333;
-            cursor: pointer;
-            background-color: transparent;
-            font-weight: bold;
-        }
-
-        button a {
-            color: black;
-            text-decoration: none;
-        }
-
-        .btn-edit {
-            background-color: transparent;
-            border-color: rgb(13, 13, 14);
-            color: black;
-        }
-
-        .btn-change-password {
-            background-color: transparent;
-            border-color: rgb(15, 15, 15);
-            color: black;
-        }
-    </style>
-</head>
-
-<body>
-    <div id="wrapper">
-        <div class="content-wrapper">
-            <div class="card">
-                <ul class="nav nav-tabs nav-tabs top-icon nav-justified">
-                    <li class="nav-item">
-                        <a href="javascript:void();" data-target="#profile" data-toggle="pill" class="nav-link active">
-                            <i class="icon-user"></i> <span class="hidden-xs">Profile</span>
-                        </a>
-                    </li>
-                </ul>
-
-                <div class="tab-pane" id="messages">
-                    <div class="table-responsive">
-                        <h4>ADDRESS</h4>
-                        <br>
-                        <div class="horizontal-address-container">
-                            <% if (addressData && addressData.address.length > 0) { %>
-                                <% addressData.address.forEach((address, index) => { %>
-                                    <div class="horizontal-address">
-                                        <%= address.address %>,<br>
-                                        <%= address.city %>,<br>
-                                        <%= address.state %><br>
-                                        <%= address.country %><br>
-                                        <%= address.pin %><br><br>
-                                        <form method="POST" action="/delete-address/<%= index %>" style="display:inline;">
-                                            <button type="submit" class="btn-delete">Delete</button>
-                                        </form>
-                                        <form method="GET" action="/edit-address/<%= index %>" style="display:inline;">
-                                            <button type="submit" class="btn-edit">Edit</button>
-                                        </form>
+        </style>
+    </head>
+    
+    <body>
+        <div class="profile-container">
+            <div class="profile-buttons">
+            <button onclick="showSection('addressSection')">Address</button>
+            <button onclick="showSection('walletSection')">Wallet</button>
+            <button onclick="showSection('accountSection')">Account Details</button>
+        </div>
+            <div id="contentArea">
+                <div id="addressSection" class="profile-content">
+                    <div class="tab-pane" id="messages">
+                        <div class="table-responsive">
+                            <h4>ADDRESS</h4>
+                            <br>
+                            <div class="horizontal-address-container">
+                                <% if (addressData && addressData.address.length > 0) { %>
+                                    <% addressData.address.forEach((address, index) => { %>
+                                        <div class="horizontal-address">
+                                            <%= address.address %>,<br>
+                                            <%= address.city %>,<br>
+                                            <%= address.state %><br>
+                                            <%= address.country %><br>
+                                            <%= address.pin %><br><br>
+                                            <form method="POST" action="/delete-address/<%= index %>" style="display:inline;">
+                                                <button type="submit" class="btn-delete">Delete</button>
+                                            </form>
+                                            <form method="GET" action="/edit-address/<%= index %>" style="display:inline;">
+                                                <button type="submit" class="btn-edit">Edit</button>
+                                            </form>
+                                        </div>
+                                    <% }) %>
+                                <% } else { %>
+                                    <h5>No addresses found.</h5>
+                                <% } %>
+                            </div>
+                            <div class="shoping__cart__btns">
+                                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addAddressModal">Add Address</button>
+                            </div>
+                            <div class="modal fade" id="addAddressModal" tabindex="-1" aria-labelledby="addAddressModalLabel" aria-hidden="true">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="addAddressModalLabel">Add Address</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <form action="/add-address" method="post">
+                                                <div class="mb-3">
+                                                    <label for="fname" class="form-label">First Name</label>
+                                                    <input type="text" class="form-control" id="fname" name="fname" required  pattern="[A-Za-z\s]+" title="First name should only contain letters and spaces." maxlength="50">
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label for="lname" class="form-label">Last Name</label>
+                                                    <input type="text" class="form-control" id="lname" name="lname" required  pattern="[A-Za-z\s]+" title="last name should only contain letters and spaces." maxlength="50">
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label for="country" class="form-label">Country</label>
+                                                    <input type="text" class="form-control" id="country" name="country" required  pattern="[A-Za-z\s]+" title="country should only contain letters and spaces." maxlength="50">
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label for="state" class="form-label">State</label>
+                                                    <input type="text" class="form-control" id="state" name="state" required  pattern="[A-Za-z\s]+" title="state should only contain letters and spaces." maxlength="50">
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label for="city" class="form-label">Town/City</label>
+                                                    <input type="text" class="form-control" id="city" name="city" required  pattern="[A-Za-z\s]+" title="city should only contain letters and spaces." maxlength="50">
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label for="address" class="form-label">Address</label>
+                                                    <input type="text" class="form-control" id="address" name="address" required minlength="5" maxlength="100">
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label for="pin" class="form-label">Postcode / ZIP</label>
+                                                    <input type="text" class="form-control" id="pin" name="pin" required pattern="[0-9]{5,6}" title="Postcode should be a 5-6 digit number." maxlength="6">
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label for="phone" class="form-label">Phone</label>
+                                                    <input type="text" class="form-control" id="phone" name="phone" required pattern="[0-9]{10}" title="Phone number should be a 10-digit number." maxlength="10">
+                                                </div>
+                                                <button type="submit" class="btn btn-primary">Submit</button>
+                                            </form>
+                                        </div>
                                     </div>
-                                <% }) %>
-                            <% } else { %>
-                                <h5>No addresses found.</h5>
-                            <% } %>
-                        </div>
-                        <div class="shoping__cart__btns">
-                            <a href="/add-address">Add Address</a>
+                                </div>
+                            </div>
+                        
+                            
                         </div>
                     </div>
                 </div>
-
-                <div class="tab-content p-2">
-                    <div class="tab-pane active" id="profile">
-                        <br>
-                        <div class="row">
-                            <div class="col-md-12">
-                                <h5>Name: <%= userData.name %></h5>
-                                <h5>Mobile Number: <%= userData.mobile %></h5>
-                                <h5>Email: <%= userData.email %></h5>
-                            </div>
-                            <div class="col-md-12">
-                                <button class="btn-edit">
-                                    <a href="/edit?id=<%= userData._id %>">Edit</a>
-                                </button>
-                                <div style="margin-top: 5%; margin-bottom: 10%;">
-                                    <button class="btn-change-password">
-                                        <a href="/changepassword">Change Your Password</a>
+    
+                <div id="walletSection" class="profile-content">
+                    <div style="margin-top: 10px;">
+                        <button class="btn-wallet">
+                            <a href="/wallet">Wallet</a>
+                        </button>
+                    </div>
+                </div>
+    
+                <div id="accountSection" class="profile-content">
+                    <div class="content-title">Your Account Details</div>
+                    <div class="tab-content p-2">
+                        <div class="tab-pane active" id="profile">
+                            <br>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <h5>Name: <%= userData.name %></h5>
+                                    <h5>Mobile Number: <%= userData.mobile %></h5>
+                                    <h5>Email: <%= userData.email %></h5>
+                                </div>
+                                <div class="col-md-12">
+                                    <button class="btn-edit">
+                                        <a href="/edit?id=<%= userData._id %>">Edit</a>
                                     </button>
+                                   
+                                    <div style="margin-top: 10px;">
+                                        <button class="btn-change-password">
+                                            <a href="/changepassword">Change Your Password</a>
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
+               
                 </div>
             </div>
-        </div>
-    </div>
 
+            <script>
+                function showSection(sectionId) {
+                    
+                    document.querySelectorAll('.profile-content').forEach(function(section) {
+                        section.classList.remove('active');
+                    });
+        
+                    document.getElementById(sectionId).classList.add('active');
+                }
+        
+                
+                document.getElementById('addressSection').classList.add('active');
+            </script>
+    
+           </body>
+
+
+
+
+
+
+
+
+
+
+               
+               
 
 
 
@@ -227,6 +231,8 @@
 
   <!-- Custom scripts -->
   <script src="js/app-script.js"></script>
+
+  
 
 </body>
 </html>

@@ -6,14 +6,15 @@ const User = require('../../models/userModel')
 
 const order = require('../../models/orderModel');
 const cart = require('../../models/cartModel');
-const product = require('../../models/productModel');
+const products =  require('../../models/productModel');
 const walletTransaction = require('../../models/walletTransactionModel') 
 
 const address=require('../../models/addressModel')
 
 const Razorpay = require('razorpay')
 
-let dotenv = require('dotenv')
+let dotenv = require('dotenv');
+const { recordWalletTransaction } = require('./checkoutController');
 dotenv.config()
 
 const razorpayInstance = new Razorpay({
@@ -63,29 +64,90 @@ const getSingleOrderView = async (req, res) => {
 
 
 
-const editOrder = async (req, res) => {
+
+
+const cancelOrder = async(req,res) =>{
+    try{
+        const {orderId,cancelReason} = req.body
+        console.log("ID",orderId)
+        if(!orderId || !cancelReason){
+            return res.status(404).json({success:false,message:'OrderID and cancel reason are required'})
+        }
+        
+        const orderData = await order.findById({_id:orderId})
+        console.log("%%",orderData)
+        
+
+        if(orderData.status === 'Placed'){
+            await order.updateOne({_id:orderId},
+                {$set:{
+                    status:'canceled by user',
+                    cancellationReason:cancelReason
+                }
+            })
+            if(orderData.paymentMethod !== 'COD' ){
+                const user=await User.findById({ _id: req.session.user_id})
+                const refundAmount= orderData.totalAmount
+
+               
+
+                await recordWalletTransaction(
+                    orderData.userId,
+                    'credit',
+                    refundAmount,
+                    'order cancelled'
+                )
+
+
+            }
+            const canceledProducts = orderData.product;
+      for (const product of canceledProducts) {
+        await products.findByIdAndUpdate(product.productId, { $inc: { stock: product.quantity } });
+      }
+
+      res.json({ success: true, message: 'Order cancelled successfully and wallet credited.',
+        newStatus:'cancelled'
+      });
+    } else {
+      res.status(400).json({ success: false, message: 'Order cannot be cancelled.' });
+        }
+      }catch(error){
+        console.log(error.message)
+    }
+   }
+
+   const returnOrder = async (req, res) => {
     try {
-        const id = req.query.id
-        const orderData = await order.findById({ _id: id })
+        const { orderId, reason } = req.body; 
 
 
-        if (orderData.status === 'placed') {
-            await order.updateOne({ _id: id }, { $set: { status: 'req-for-cancellation' } })
-            res.redirect('/myorders')
+        const orderData = await order.findById(orderId);
+
+        if (!orderData) {
+            return res.status(404).json({ success: false, message: 'Order not found.' });
         }
 
-        if (orderData.status === 'delivered') {
-            await order.updateOne({ _id: id }, { $set: { status: 'req-for-return' } })
-            res.redirect('/myorders')
+        
+        if (orderData.status === 'Delivered') {
+            
+            await order.updateOne({ _id: orderId }, { 
+                $set: { 
+                    status: 'req-for-return', 
+                    returnReason: reason 
+                } 
+            });
+
+            
+            res.json({ success: true, message: 'Return request submitted successfully.' });
+        } else {
+            res.status(400).json({ success: false, message: 'Order cannot be returned.' });
         }
-
-
-
-
     } catch (error) {
         console.log(error.message);
+        res.status(500).json({ success: false, message: 'Internal server error.' });
     }
-}
+};
+
 
 const verifyOnlinePayment = async (req, res) => {
     try {
@@ -126,7 +188,8 @@ module.exports = {
 
     getMyOrders,
     getSingleOrderView,
-    editOrder ,
-    verifyOnlinePayment
+    verifyOnlinePayment,
+    cancelOrder,
+    returnOrder
     
 }
