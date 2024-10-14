@@ -24,6 +24,11 @@ const postLogin = async(req,res)=>{
         
         
             if (userDb && userDb.is_verified === 1 ) {
+
+                if (userDb.is_block === 1) {
+                    return res.render('login', { message: 'Your account is blocked. Please contact support.' });
+                }
+    
                
            const passwordMatch = await bcrypt.compare(passwordEntered,userDb.password)
             

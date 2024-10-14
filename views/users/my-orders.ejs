@@ -5,6 +5,9 @@
     <!-- Header Section End -->
 <body class="bg-theme bg-theme1">
 
+    
+
+
     <div class="container-fluid">
         <div class="row">
             <div class="col-lg-12">
@@ -28,63 +31,63 @@
                                 </thead>
                                 <tbody>
                                     <% if (message.length > 0) { %>
-                                      <% for (let i = message.length - 1; i >= 0; i--) { %>
+                                      <% message.forEach((order, index) => { %>
                                         <tr>
                                           <th scope="row">
-                                            <%= message.length - i %>
+                                            <%= index+1 %>
                                           </th>
                                   
                                           <td>
-                                            <%= message[i].date.toISOString().substring(0,10) %>
+                                            <%= order.date.toISOString().substring(0,10) %>
                                           </td>
                                   
                                           <td>
-                                            <%= message[i].totalAmount %>
+                                            <%= order.totalAmount %>
                                           </td>
                                   
                                           <td>
-                                            <%= message[i].paid %>
+                                            <%= order.paid %>
                                           </td>
                                   
                                           <td>
-                                            <%= message[i].paymentMethod %>
+                                            <%= order.paymentMethod %>
                                           </td>
                                   
                                           <td>
-                                            <a href="/singleorderview?id=<%= message[i]._id %>">View Details</a>
+                                            <a href="/singleorderview?id=<%= order._id %>">View Details</a>
                                           </td>
                                   
                                           <!-- Status Column -->
-                                          <td id="status-<%= message[i]._id %>">
-                                            <% if (message[i].status == 'Placed') { %>
+                                          <td id="status-<%= order._id %>">
+                                            <% if (order.status == 'Placed') { %>
                                               Placed
-                                            <% } else if (message[i].status == 'cancelled') { %>
+                                            <% } else if (order.status == 'cancelled') { %>
                                               Cancelled
-                                            <% } else if (message[i].status == 'Delivered') { %>
+                                            <% } else if (order.status == 'Delivered') { %>
                                               Delivered
-                                            <% } else if (message[i].status == 'req-for-return') { %>
+                                            <% } else if (order.status == 'req-for-return') { %>
                                               Requested for return
-                                            <% } else if (message[i].status == 'returned') { %>
+                                            <% } else if (order.status == 'returned') { %>
                                               Returned
                                             <% } %>
                                           </td>
                                   
                                           <!-- Action Column -->
-                                          <td id="action-<%= message[i]._id %>">
-                                            <% if (message[i].status == 'Placed') { %>
+                                          <td id="action-<%= order._id %>">
+                                            <% if (order.status == 'Placed') { %>
                                               <a style="color:rgb(228, 19, 19);" href="javascript:void(0);" 
-                                                data-bs-toggle="modal" onclick="showCancelModal('<%= message[i]._id %>')">Cancel</a>
-                                            <% } else if (message[i].status == 'canceled By Admin' || message[i].status == 'canceled By User') { %>
+                                                data-bs-toggle="modal" onclick="showCancelModal('<%= order._id %>')">Cancel</a>
+                                            <% } else if (order.status == 'Canceled By Admin' || order.status == 'Canceled By User') { %>
                                               <button type="button" class="view disabled" aria-disabled="true">Order Cancelled</button>
                                              <% } %>
-                                             <% if (message[i].status == 'Delivered') { %>
-                                              <a href="javascript:void(0);" class="view" onclick="showReturnModal('<%= message[i]._id %>')">Return Order</a>
-                                              <% } else if(message[i].status == "Return Pending" || message[i].status == "Return Completed" || message[i].status =="Return Rejected") {%>
-                                                 <a href="javascript:void(0);" class="view"><%=message[i].status%></a>
+                                             <% if (order.status == 'Delivered') { %>
+                                              <a href="javascript:void(0);" class="view" onclick="showReturnModal('<%= order._id %>')">Return Order</a>
+                                              <% } else if(order.status == "Return Pending" || order.status == "Return Completed" || order.status =="Return Rejected") {%>
+                                                 <a href="javascript:void(0);" class="view"><%= order.status%></a>
                                               <% } %>   
                                           </td>
                                         </tr>
-                                      <% } %>
+                                      <% })%>
                                     <% } else { %>
                                       <tr>
                                         <td colspan="3">Orders not found</td>
@@ -93,6 +96,7 @@
                                   </tbody>
                                   
                             </table>
+                            
                         </div>
                     </div>
                 </div>

@@ -21,18 +21,18 @@ const userSchema = mongoose.Schema({
     is_admin:{
         type:Number,
         required:true,
-        defualt:false
+        default:0
     },
     is_block:{
         type:Number,
         required:true,
-        defualt:false
+        default:0
     },
     
     
     is_verified:{
         type:Number,
-        defualt:0,
+        default:0,
     },
     referralCode:{
         type:String,

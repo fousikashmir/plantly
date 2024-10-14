@@ -1,12 +1,15 @@
 const mongoose = require('mongoose')
+const session = require('express-session');
 const productModel = require('../../models/productModel')
 const order = require('../../models/orderModel')
 const User = require('../../models/userModel')
-const session = require('express-session')
+const walletTransaction = require('../../models/walletTransactionModel') 
+
+
 
 async function recordWalletTransaction(userId, transactionType, amount, description) {
     try {
-      const transaction = new walletTransactionCollection({
+      const transaction = new walletTransaction({
         userId,
         transactionType,
         amount,
@@ -29,8 +32,8 @@ const getOrders = async(req,res)=>{
         const limit = parseInt(req.query.limit) || 10;
         const skip = (page-1) * limit;
 
-        const orders = await order.find({}).skip(skip).limit(limit);
-        console.log("00",orders)
+        const orders = await order.find({}).sort({createdAt:-1}).skip(skip).limit(limit);
+        
         const totalOrders = await order.countDocuments();
 
         
@@ -97,6 +100,8 @@ const updateOrderStatus = async (req, res) => {
 const cancelOrder = async (req, res) => {
     try {
       const { orderId ,userId} = req.body;
+      console.log("ORder",orderId)
+      console.log("Us",userId)
   
       if (!orderId) {
         return res.status(400).json({ success: false, message: 'Order ID is required.' });
@@ -113,7 +118,7 @@ const cancelOrder = async (req, res) => {
       }
   
       
-      await order.updateOne({ _id: orderId }, { $set: { status: 'Cancelled by Admin' } });
+      await order.updateOne({ _id: orderId }, { $set: { status: 'Canceled By Admin' } });
   
       
       const cancelledProducts = orderData.product;
@@ -124,7 +129,9 @@ const cancelOrder = async (req, res) => {
     
       if (orderData.paymentMethod !== 'COD') {
         const refundAmount = orderData.totalAmount;
-        const userId = orderData.user;
+      
+        console.log(`Processing refund of ${refundAmount} for user ${userId}`);
+    
   
     
         await recordWalletTransaction(userId, 'credit', refundAmount, 'Order cancelled by admin');
@@ -139,43 +146,74 @@ const cancelOrder = async (req, res) => {
   
         const returnOrder = async (req,res) => {
                 try{
-                    if (orderData.status === 'req-for-return') {
+                    const {orderId,userId} =req.body
+                    console.log("$$",orderId)
+                    
+                     
+                     console.log("UU",userId)
 
+                     const orderData = await order.findById(orderId);
+                    console.log("Order Data Retrieved:", orderData); 
+                   if (!orderData || orderData.status !== 'req-for-return') {
+                    console.log("Condition Triggered: Order not found or incorrect status.");
+                       return res.status(404).json({ success: false, message: 'Order not found or return not requested' });
+                             }
 
-                        const userid = req.session.user_id
-                        
-                        await User.findByIdAndUpdate({ _id: userid }, { $set: { wallet: totalBillAmount } })
-            
-                        const userId = userid;
-                        const transactionType = 'credit';
+                           
+                    
+
+                    const returnRequest = orderData.requests.find(request => request.type === 'Return' && request.oderStatus === 'Pending');
+                    if (returnRequest) {
+                      returnRequest.status = 'Accepted';
+                      orderData.status = "Return Completed";
+                    }
+                    await orderData.save();
+
+                    const returnedProducts = orderData.product;
+                    for(const product of returnedProducts){
+                      await productModel.findByIdAndUpdate(product.productId, { $inc: { stock: product.quantity } });
+                    }
+
+                       const totalBillAmount = orderData.totalAmount;
+                       const transactionType = 'credit';
                         const transactionAmount =totalBillAmount;
+                        
+
                         const transactionDescription = 'Order returned';
                         await recordWalletTransaction(userId, transactionType, transactionAmount, transactionDescription);
             
             
-                        await order.updateOne({ _id: id }, { $set: { status: 'returned' } })
+                        await order.findByIdAndUpdate({ _id: id }, { $set: { status: 'returned' } })
             
                         
-                        const product = orderData.product
-                        for (let i = 0; i < product.length; i++) {
-                            const productId = product[i].productId
-                            const productData = await productModel.findById({ _id: productId })
-                            if (productData.stock === 0) {
-                                await productModel.findByIdAndUpdate(productId, { $set: { status: 'In Stock' } })
-                            }
-                            const quantity = product[i].count
-                            await productModel.findByIdAndUpdate(productId, { $inc: { stock: +quantity } })
-            
-                        }
+                       res.json({success:true})
                         
-                        res.redirect('/admin/orders')
-                    }
+                      
+                    
             
 
                 }catch(error){
                     console.log(error.message)
                 }
 
+            }
+
+            const rejectReturn = async (req, res) => {
+              try {
+                const { orderId } = req.body;
+                const orderData = await order.findById(orderId);
+            
+                const returnRequest = orderData.requests.find(request => request.type === 'Return' && request.oderStatus === 'Pending');
+                if (returnRequest) {
+                  returnRequest.status = 'Rejected';
+                  orderData.status = "Return Rejected";
+                }
+                await orderData.save();
+                res.json({ success: true });
+            
+              } catch (err) {
+                console.log(err);
+              }
             }
 
 
@@ -186,5 +224,6 @@ module.exports={
     recordWalletTransaction,
     cancelOrder,
     returnOrder,
-    updateOrderStatus
+    updateOrderStatus,
+    rejectReturn
 }

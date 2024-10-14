@@ -9,10 +9,12 @@ const couponSchema = new mongoose.Schema({
         required:true
     },
     discountAmount:{
-        type:Number
+        type:Number,
+        min:0
     },
     maxDiscountAmount:{
-        type:Number
+        type:Number,
+        min:0
     },
     user:{
         type:Array,
@@ -24,8 +26,9 @@ const couponSchema = new mongoose.Schema({
         type:Number
     },
     status:{
-        type:Boolean,
-        default:true
+        type: String,
+        enum: ['Active', 'Expired', 'Disabled'], 
+        default: 'Active'
     },
     expiryDate:{
         type:Date,

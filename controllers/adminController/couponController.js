@@ -4,7 +4,13 @@ const coupon = require("../../models/couponModel")
 
  const getCouponListPage = async function (req, res) {
     try {
+        await coupon.updateMany(
+            { expiryDate: { $lt: new Date() }, status: 'Active' },
+            { $set: { status: 'Expired' } }
+        ).exec();
         const couponData = await coupon.find({})
+
+        
         res.render('coupons', { message: couponData })
     } catch (error) {
         console.log(error);
@@ -26,6 +32,7 @@ const coupon = require("../../models/couponModel")
 
  const postAddCoupon = async function (req, res) {
     try {
+        const couponStatus = new Date(req.body.expirydate) > new Date() ? 'Active' : 'Expired';
         const newCoupon = new coupon({
             code: req.body.code,
             discountType: req.body.discountType,
@@ -33,7 +40,8 @@ const coupon = require("../../models/couponModel")
             maxDiscountAmount: req.body.amount,
             maxCartAmount: req.body.cartamount,
             expiryDate: req.body.expirydate,
-            maxUsers: req.body.couponcount
+            maxUsers: req.body.couponcount,
+            status : couponStatus
         })
         const couponData = await newCoupon.save()
 
@@ -55,7 +63,8 @@ const coupon = require("../../models/couponModel")
     try {
         const id = req.query.id
        await coupon.deleteOne({_id:id})
-       res.redirect("/admin/coupons")
+       res.status(200).json({ success: true, message: "Coupon deleted successfully" });
+
     } catch (error) {
         console.log(error);
     }
@@ -80,6 +89,7 @@ const coupon = require("../../models/couponModel")
  const postEditCoupon = async function (req, res) {
     try {
         const id = req.body.id
+        const couponStatus = new Date(req.body.expirydate) > new Date() ? 'Active' : 'Expired';
         await coupon.updateMany({_id:id},{$set:{
             code: req.body.code,
             discountType: req.body.discountType,
@@ -87,7 +97,8 @@ const coupon = require("../../models/couponModel")
             maxDiscountAmount: req.body.amount,
             maxCartAmount: req.body.cartamount,
             expiryDate: req.body.expirydate,
-            maxUsers: req.body.couponcount
+            maxUsers: req.body.couponcount,
+            status: couponStatus
         }})
 
         res.redirect("/admin/coupons")

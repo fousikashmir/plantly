@@ -30,6 +30,7 @@
     "multer": "^1.4.5-lts.1",
     "nodemailer": "^6.9.13",
     "nodemon": "^3.1.0",
+    "pdfkit": "^0.15.0",
     "razorpay": "^2.9.4",
     "shortid": "^2.2.16",
     "time-zone": "^2.0.0"

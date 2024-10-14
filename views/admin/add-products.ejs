@@ -12,7 +12,7 @@
                         <div class="card-body">
                             <div class="card-title">ADD NEW PRODUCT</div>
                             <hr>
-                            <form method="post"  id="productForm"  enctype="multipart/form-data">
+                            <form method="post"  id="productForm"  enctype="multipart/form-data" onsubmit="return validateForm()">
                              
                                 <div class="form-group">
                                     <label for="input-1">Product Name</label>
@@ -62,7 +62,7 @@
 
                                 <div class="form-group">
                                   <label for="input-1">Enter stock </label>
-                                  <input type="number" name="stock" required class="form-control" id="input-1" placeholder="Enter stock">
+                                  <input type="number" name="stock" required class="form-control" id="input-1" placeholder="Enter stock" oninput="validateStockInput(this)">
                                   <div class="d-none" id="stock_error" style="color: red;"></div>
                                   <div class="d-none" id="negative_stock_warning" style="color: red;"></div>
                               </div>

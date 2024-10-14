@@ -74,6 +74,7 @@
                                     <% } %>
                                 </details>
                             </div>
+                           
                         </div>
                     </div>
 
@@ -84,15 +85,13 @@
                             <ul>
                                 <% products.forEach((value,index)=>{%>
                                 <li>
-                                    <%=value.productId.name%><span>
-                                            <%=(value.productId.price*value.count).toFixed(2)%>
-                                        </span>
+                                    <%=value.productId.name%>     
                                 </li>
                                 <%})%>
 
                             </ul>
                             <div class="checkout__order__subtotal">Subtotal <span>
-                                    <%=Total.toFixed(2)%>
+                                    <%=originalTotal.toFixed(2)%>
                                 </span></div>
                                         
 
@@ -102,14 +101,15 @@
                                 </span></div>
 
 
-                                 <!-- Total Amount (after discount) -->
+                                 
                             <div class="checkout__order__total">Total Amount <span id="total1">
-                                <%= (Total -(snakePlantDiscount + floweringPlantsDiscount + couponDiscount)).toFixed(2) %>
+                                <%= Total .toFixed(2) %>
                             </span></div>
 
-                            <!-- Wallet Payment Option -->
+                            
                             <div class="form-group">
-                                <% if (walletAmount>= Total) { %>
+                                <% if (parseFloat(walletAmount) >= parseFloat(Total)) { %>
+
                                     <div class="col-md-12">
                                     <div class="radio">
                                         <label>
@@ -147,7 +147,15 @@
                             
                                 <div class="col-md-12">
                                     <div class="radio">
+                                        <% if (Total <= 1000) { %>
                                         <label><input type="radio" name="payment" value="COD" required> Cash On Delivery</label>
+                                        <% } else { %>
+                                            <label><input type="radio" name="payment" value="COD" disabled >
+                                            <span>Cash On Delivery</span>
+                                            </label>
+                                            <p style="color: red; font-size: 10px;">Cash on Delivery is only available for orders under ₹1000.</p>
+
+                                       <% } %>
                                     </div>
                                 </div>
                             </div>
@@ -164,11 +172,17 @@
     </div>
 
 </section>
+
+
 <!-- Checkout Section End -->
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
 
 <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
+<script>
+    console.log("Wallet Amount: <%= walletAmount %>, Total: <%= Total %>");
+</script>
 
 <script>
     $("#checkout").submit((e) => {

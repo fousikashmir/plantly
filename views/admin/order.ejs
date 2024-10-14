@@ -87,7 +87,7 @@ ul.pagination li a {
                               <span class="badge rounded-pill alert-warning">Order Shipped</span>
                             <% } else if (order.status == "Delivered") { %>
                               <span class="badge rounded-pill alert-success">Order Delivered</span>
-                            <% } else if (order.status == "Canceled By Admin" || order.status == "canceled By user" || order.status == "Return Rejected") { %>
+                            <% } else if (order.status == "Canceled By Admin" || order.status == "Canceled By User" || order.status == "Return Rejected") { %>
                               <span class="badge rounded-pill alert-danger"><%= order.status %></span>
                             <% } else if (order.status == "Return Pending") { %>
                               <span class="badge rounded-pill alert-info">Return Pending</span>
@@ -146,7 +146,7 @@ ul.pagination li a {
                      <script>
 
 
-async function cancelOrder(orderId, userId) {
+async function cancelOrder(orderId,userId) {
   const result = await Swal.fire({
     title: 'Are you sure?',
     text: 'You want to cancel this order?',
@@ -160,7 +160,7 @@ async function cancelOrder(orderId, userId) {
     $.ajax({
       url: '/admin/cancelOrder',
       type: 'POST',
-      data: JSON.stringify({ orderId, userId }),
+      data: JSON.stringify({ orderId,userId }),
       contentType: 'application/json',
       success: async function(data) {
         console.log('Response from server:', data);

@@ -40,18 +40,25 @@ product:[{
     status:{
         type:String,
         default:"Placed"
-
+    
     },
+    
     cancelReason:{
         type:String,
         default:null
     }
 
 }],
+
 paid:{type:Number},
 totalAmount:{type:Number},
+status:{
+    type:String,
+    default:"Placed"
+
+},
 date:{type: Date},
-status:{type:String},
+
 cancelReason:{
     type:String,
     default:null
@@ -64,7 +71,12 @@ paymentId:{type:String},
 requests:[{
     type:{
         type:String,
-        enum:['cancel','Return'],
+        enum:['Cancel','Return'],
+    },
+    oderStatus:{
+        type:String,
+        enum:['Pending', 'Accepted', 'Rejected'],
+        
     },
     
     reason:String,

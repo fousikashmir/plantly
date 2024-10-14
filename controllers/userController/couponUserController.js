@@ -30,6 +30,9 @@ const applyCoupon = async (req, res) => {
                                 await coupon.findByIdAndUpdate({ _id: couponData._id }, { $inc: { maxUsers: -1 } });
                                 if (couponData.discountType == "Fixed") {
                                     const disAmount = couponData.discountAmount;
+                                    if (disAmount > amount) {
+                                        disAmount = amount;  
+                                    }
                                     const disTotal = Math.round(amount - disAmount);
                                     return res.json({ amountOkey: true, disAmount, disTotal });
                                 } else if (couponData.discountType == "Percentage Type") {
@@ -40,8 +43,8 @@ const applyCoupon = async (req, res) => {
                                         return res.json({ amountOkey: true, disAmount, disTotal });
                                     }
                                 } else {
-                                    const disAmount = couponData.maxDiscountAmount;
-                                    const disTotal = Math.round(amount - disAmount);
+                                    let disAmount = couponData.maxDiscountAmount;
+                                    let disTotal = Math.round(amount - disAmount);
                                     return res.json({ amountOkey: true, disAmount, disTotal });
                                 }
                             }

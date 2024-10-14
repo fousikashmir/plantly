@@ -1,7 +1,7 @@
 const express = require('express')
 const user_route = express() 
+const session = require('express-session');
 
-const config = require('../config/config')
 
 const homeController = require("../controllers/userController/homeController")
 const forgotController = require("../controllers/userController/forgotController")
@@ -16,26 +16,15 @@ const wishListController = require("../controllers/userController/wishListContro
 const walletController = require("../controllers/userController/walletController")
 const couponUserController = require("../controllers/userController/couponUserController")
 
-const session = require('express-session')
 const auth = require('../middlewares/auth')
 
-
-
-
-user_route.set('view engine','ejs')
 user_route.set('views','./views/users')
-const bodyParser = require('body-parser')
-user_route.use(bodyParser.json())
+
 user_route.use(express.json())
 user_route.use(express.urlencoded({extended:true}))
 
 
-user_route.use(session({
-    secret:config.sessionSecret,
-    saveUninitialized:true,
-    resave:false,
-    cookie:{maxAge : 1000*60*60*24},
-}))
+
 
 
 
@@ -104,12 +93,14 @@ user_route.get('/singleorderview',orderController.getSingleOrderView)
 
 user_route.post('/cancelOrder',orderController.cancelOrder)
 user_route.post('/returnorder',orderController.returnOrder)
+user_route.get('/downloadOrderInvoice',orderController.downloadInvoice)
+
 
 //wishlist
 user_route.get('/wishlist',auth.isLogin,wishListController.getWishList)
 user_route.post('/addtowishlist',auth.isLogin,wishListController.addToWishList)
-user_route.post('/whishtoCart',auth.isLogin,wishListController.addToCartFromWishlist)
-user_route.delete('/removeproduct',auth.isLogin,wishListController.removeProduct)
+user_route.post('/wishtoCart',auth.isLogin,wishListController.addToCartFromWishlist)
+user_route.delete('/removewishproduct',auth.isLogin,wishListController.removeProduct)
 
 user_route.post('/applyCoupon',couponUserController.applyCoupon)
 

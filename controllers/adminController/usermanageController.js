@@ -11,6 +11,7 @@ const getUserManagement = async(req,res)=>{
         const limit = 10;
         const skip = (page-1) * limit
        const userDatas = await users.find({$and:[{is_verified:1},{is_admin:0}]})
+       .sort({createdAt:-1})
        .skip(skip)
        .limit(limit);
        const totalUsers = await users.countDocuments({ $and: [{is_verified:1},{is_admin:0}]})

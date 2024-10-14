@@ -1,6 +1,8 @@
 const express = require('express')
 const admin_route = express()
-const config = require('../config/config')
+const session = require('express-session');
+
+
 const categoryController = require('../controllers/adminController/categoryController')
 const productController = require('../controllers/adminController/productController')
 const usermanageController = require('../controllers/adminController/usermanageController')
@@ -10,22 +12,14 @@ const ordrController = require('../controllers/adminController/ordrController')
 const couponController = require('../controllers/adminController/couponController')
 
 const authAdmin = require('../middlewares/authAdmin')
-const session = require('express-session')
-
-admin_route.set('view engine','ejs')
-admin_route.set('views','./views/admin')
-
-
-
-admin_route.use(session({
-    secret: config.sessionSecret,
-    saveUninitialized:true,
-    resave:false,
-    cookie:{maxAge:120000}
-}))
-
 const path = require('path')
 const multer = require('multer')
+const moment = require("moment-timezone");
+
+
+
+admin_route.set('views','./views/admin')
+
 
 const storage = multer.diskStorage({
     destination:function(req,file,cb){
@@ -38,7 +32,7 @@ const storage = multer.diskStorage({
 })
 
 const upload = multer({storage:storage})
-const moment = require("moment-timezone");
+
 
 const parseDateMiddleware = (req, res, next) => {
     const { from, to } = req.query;
@@ -98,6 +92,7 @@ admin_route.get('/singleorder',ordrController.getSingleOrder)
 admin_route.post('/cancelOrder',ordrController.cancelOrder)
 admin_route.post('/updateorderstatus',ordrController.updateOrderStatus)
 admin_route.post('/returnadminorder',ordrController.returnOrder)
+admin_route.post('/rejectreturnorder',ordrController.rejectReturn)
 
 
 
@@ -106,7 +101,7 @@ admin_route.post('/coupons/add',couponController.postAddCoupon)
 admin_route.get('/coupons/edit',couponController.editCoupon)
 admin_route.post('/coupons/edit',couponController.postEditCoupon)
 admin_route.get('/coupons/add',couponController.getCouponAddPage)
-admin_route.get('/coupons/delete',couponController.deleteCoupon)
+admin_route.delete('/coupons/delete',couponController.deleteCoupon)
 
 admin_route.get('/salesreport',authAdmin.isLogin,dashBoardController.getSalesReport)
 admin_route.get('/salesreport/download', authAdmin.isLogin, parseDateMiddleware, dashBoardController.downloadSalesReport);
