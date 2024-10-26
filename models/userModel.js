@@ -37,6 +37,10 @@ const userSchema = mongoose.Schema({
     referralCode:{
         type:String,
         unique:true
+    },
+    walletBalance: {
+        type: Number,
+        default: 0
     }
 
 })

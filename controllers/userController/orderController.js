@@ -47,11 +47,14 @@ const getSingleOrderView = async (req, res) => {
         const userData = await User.findOne({ _id: req.session.user_id })
         const id = req.query.id
         const session = req.session.user_id
-        const orderData = await order.findById({_id:id}).populate("product.productId")
+        const orderData = await order.findById({_id:id}).populate("product.productId").populate("coupon")
+        console.log("OOR",orderData)
+        
        
         const product = orderData.product
+        const coupon=orderData.coupon
        
-        res.render('single-orderview', { product, orderData, session, userData })
+        res.render('single-orderview', { product, orderData, session, userData,coupon })
     } catch (error) {
         console.log(error.message);
     }
@@ -103,6 +106,11 @@ const cancelOrder = async(req,res) =>{
                     refundAmount,
                     'order cancelled'
                 )
+                user.walletBalance += refundAmount;
+                await user.save();
+
+                console.log("Wallet balance updated with refund:", user.walletBalance);
+            
 
 
             }
@@ -184,6 +192,7 @@ const verifyOnlinePayment = async (req, res) => {
             await order.findByIdAndUpdate({ _id: details.order.receipt }, { $set: { status: "Placed" } });
             await order.findByIdAndUpdate({ _id: details.order.receipt }, { $set: { paymentId: details.payment.razorpay_payment_id } });
             await cart.deleteOne({ userId: req.session.user_id });
+            delete req.session.appliedCoupon
             res.json({ success: true });
         } else {
             await order.findByIdAndRemove({ _id: details.order.receipt });
@@ -219,6 +228,7 @@ const downloadInvoice = async(req,res) => {
           const couponApplied = await Coupon.findById(orderDoc.couponApplied);
           if (couponApplied) {
             coupon = couponApplied.discountAmount; 
+            couponId = couponApplied._id;
         } else {
             console.error('Coupon not found for ID:', orderDoc.couponApplied);
             

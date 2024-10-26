@@ -81,13 +81,7 @@
                 <a href="javascript:void();" class="dropdown-toggle dropdown-toggle-nocaret" data-toggle="dropdown">
                   <i class="icon-options"></i>
                 </a>
-                <div class="dropdown-menu dropdown-menu-right">
-                  <a class="dropdown-item" href="javascript:void();">Action</a>
-                  <a class="dropdown-item" href="javascript:void();">Another action</a>
-                  <a class="dropdown-item" href="javascript:void();">Something else here</a>
-                  <div class="dropdown-divider"></div>
-                  <a class="dropdown-item" href="javascript:void();">Separated link</a>
-                </div>
+                
               </div>
             </div>
           </div>
@@ -112,29 +106,60 @@
           <input type="hidden" id="input10" value="<%=month[9]%>">
           <input type="hidden" id="input11" value="<%=month[10]%>">
           <input type="hidden" id="input12" value="<%=month[11]%>">
-          <div class="row m-0 row-group text-center border-top border-light-3">
-            <div class="col-12 col-lg-4">
-              <div class="p-3">
-                <h5 class="mb-0">45.87M</h5>
-                <small class="mb-0">Overall Visitor <span> <i class="fa fa-arrow-up"></i> 2.43%</span></small>
+         
+        </div>
+      </div>
+
+      <div class="content-wrapper">
+        <div class="container-fluid">
+          <!-- Existing Cards (Revenue, Users, etc.) -->
+      
+          <div class="row">
+            <!-- Top Selling Products -->
+            <div class="col-12 col-lg-6 col-xl-6">
+              <!-- Top Selling Products Card -->
+              <div class="card">
+                <div class="card-header">Top Selling Products</div>
+                <div class="card-body">
+                  <ul class="list-group">
+                    <% topSellingProducts.forEach(product => { %>
+                      <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <% if (product.productDetails && product.productDetails.length > 0) { %>
+                          <%= product.productDetails[0].name %> 
+                        <% } else { %>
+                          Product details not available
+                        <% } %>
+                        <span class="badge badge-primary badge-pill">Sales: <%= product.totalSold %></span>
+                      </li>
+                    <% }) %>
+                  </ul>
+                </div>
               </div>
             </div>
-            <div class="col-12 col-lg-4">
-              <div class="p-3">
-                <h5 class="mb-0">15:48</h5>
-                <small class="mb-0">Visitor Duration <span> <i class="fa fa-arrow-up"></i> 12.65%</span></small>
-              </div>
-            </div>
-            <div class="col-12 col-lg-4">
-              <div class="p-3">
-                <h5 class="mb-0">245.65</h5>
-                <small class="mb-0">Pages/Visit <span> <i class="fa fa-arrow-up"></i> 5.62%</span></small>
+      
+            <!-- Top Selling Categories -->
+            <div class="col-12 col-lg-6 col-xl-6">
+              <!-- Top Selling Categories Card -->
+              <div class="card">
+                <div class="card-header">Top Selling Categories</div>
+                <div class="card-body">
+                  <ul class="list-group">
+                    <% topSellingCategories.forEach(category => { %>
+                      <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <%= category._id %>
+                        <span class="badge badge-primary badge-pill">Sales: <%= category.totalSold %></span>
+                      </li>
+                    <% }) %>
+                  </ul>
+                </div>
               </div>
             </div>
           </div>
-
+      
+          <!-- Existing Charts and Other Dashboard Elements -->
         </div>
       </div>
+      
       <!-- ------------------------------------------------------------------------------------------- -->
 
       <!-- -------------------------------count of COD ONLINE WALLET- --------------------------------------------------- -->
@@ -146,13 +171,7 @@
                 <a href="javascript:void();" class="dropdown-toggle dropdown-toggle-nocaret" data-toggle="dropdown">
                   <i class="icon-options"></i>
                 </a>
-                <div class="dropdown-menu dropdown-menu-right">
-                  <a class="dropdown-item" href="javascript:void();">Action</a>
-                  <a class="dropdown-item" href="javascript:void();">Another action</a>
-                  <a class="dropdown-item" href="javascript:void();">Something else here</a>
-                  <div class="dropdown-divider"></div>
-                  <a class="dropdown-item" href="javascript:void();">Separated link</a>
-                </div>
+               
               </div>
             </div>
           </div>
@@ -170,7 +189,7 @@
               <input type="hidden" value="<%= pay.totalPayment %>" id="COD">
               <% } else if (pay._id=='online' ) { %>
                 <input type="hidden" value="<%= pay.totalPayment %>" id="online">
-                <% }  else { %>
+                <% }  else if (pay._id == 'wallet' && pay.totalPayment > 0){ %>
                   <input type="hidden" value="<%= pay.totalPayment %>" id="Wallet">
                   <% } %>
                     <% }) %>
@@ -242,9 +261,9 @@ $(document).ready(function() {
           labels: ["COD", "Online", "Wallet Only"],
           datasets: [{
             backgroundColor: [
-              "#ffffff",
-              "rgba(255, 255, 255, 0.70)",
-              "rgba(255, 255, 255, 0.50)"
+            "#3498db",  // Blue for COD
+        "#2ecc71",  // Green for Online
+        "#e67e22"
             ],
             data: [coddata, onlinedata, walletdata],
             borderWidth: [0, 0, 0]
@@ -291,7 +310,20 @@ $(document).ready(function() {
           datasets: [{
             label: 'Sales',
             data: [input1,input2,input3,input4,input5,input6,input7,input8,input9,input10,input11,input12] ,
-            backgroundColor: '#fff',
+            backgroundColor: [
+        '#3498db',  // Color for January
+        '#e74c3c',  // Color for February
+        '#2ecc71',  // Color for March
+        '#f1c40f',  // Color for April
+        '#8e44ad',  // Color for May
+        '#e67e22',  // Color for June
+        '#1abc9c',  // Color for July
+        '#34495e',  // Color for August
+        '#9b59b6',  // Color for September
+        '#2c3e50',  // Color for October
+        '#d35400',  // Color for November
+        '#2980b9'   // Color for December
+      ],
             borderColor: "transparent",
             pointRadius: "0",
             borderWidth: 3

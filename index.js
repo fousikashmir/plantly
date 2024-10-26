@@ -19,7 +19,7 @@ app.use(express.static('public/admin'));
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(session({
     secret: config.sessionSecret, 
-    saveUninitialized: true,
+    saveUninitialized: false,
     resave: false,
     cookie: { maxAge: 1000 * 60 * 60 * 24} 
 }));

@@ -53,20 +53,23 @@
                         <div class="shoping__continue">
                             <div class="shoping__discount">
                                 <h5>Discount Codes</h5>
-                                <form action="#">
-                                    <input type="text" placeholder="Enter your coupon code" id="code" style="height: 45px;">
-                                    <button type="submit" onclick="applycoupon($('#code').val())" class="site-btn">APPLY COUPON</button>
+                                <form action="#" id="couponForm">
+                                    <input type="hidden" id="couponCodeField" name="couponCode" value="<%= appliedCoupon ? appliedCoupon.code : '' %>">
+                                    <input type="text" placeholder="Enter your coupon code" id="code" style="height: 45px;" value="<%= appliedCoupon ? appliedCoupon.code : '' %>">
+                                    <button type="button" onclick="applycoupon($('#code').val())" class="site-btn">APPLY COUPON</button>
+                                    <% if (appliedCoupon) { %>
                                     <button type="button" onclick="removecoupon()" class="site-btn">Remove Coupon</button>
+                                    <% } %>
                                 </form>
                             </div>
-                            <div class="border" style="padding: 10px; border-radius: 5px;background-color: azure;" >
+                            <div class="border" style="padding: 10px; border-radius: 5px; background-color: azure;">
                                 <details>
                                     <summary>Available coupons</summary>
                                     <% if (availableCoupons && availableCoupons.length > 0) { %>
                                     <% availableCoupons.forEach(coupon => { %>
                                     <div class="d-flex justify-content-between">
                                         <h6 class="my-2"><%= coupon.code %></h6>
-                                        <p>Get <%= coupon.discount %>discount</p>
+                                        <p>Get <%= coupon.discount %> discount</p>
                                     </div>
                                     <% }); %>
                                     <% } else { %>
@@ -74,115 +77,80 @@
                                     <% } %>
                                 </details>
                             </div>
-                           
-                        </div>
-                    </div>
-
-                    <div class="col-lg-4 col-md-6">
-                        <div class="checkout__order">
-                            <h4>Your Order</h4>
-                            <div class="checkout__order__products">Plants <span>Total</span></div>
-                            <ul>
-                                <% products.forEach((value,index)=>{%>
-                                <li>
-                                    <%=value.productId.name%>     
-                                </li>
-                                <%})%>
-
-                            </ul>
-                            <div class="checkout__order__subtotal">Subtotal <span>
-                                    <%=originalTotal.toFixed(2)%>
-                                </span></div>
-                                        
-
-                           
-                                <div class="checkout__order__subtotal">Discount <span id="discount">
-                                    <%= (snakePlantDiscount + floweringPlantsDiscount + couponDiscount).toFixed(2) %>
-                                </span></div>
-
-
-                                 
-                            <div class="checkout__order__total">Total Amount <span id="total1">
-                                <%= Total .toFixed(2) %>
-                            </span></div>
-
                             
-                            <div class="form-group">
-                                <% if (parseFloat(walletAmount) >= parseFloat(Total)) { %>
-
+                            <div class="checkout__order">
+                                <h4>Your Order</h4>
+                                <div class="checkout__order__products">Plants <span>Total</span></div>
+                                <ul>
+                                    <% products.forEach(value => { %>
+                                    <li><%= value.productId.name %></li>
+                                    <% }) %>
+                                </ul>
+                                <div class="checkout__order__subtotal">Subtotal <span><%= originalTotal.toFixed(2) %></span></div>
+                                <div class="checkout__order__subtotal">Discount <span id="discount"><%= (snakePlantDiscount + floweringPlantsDiscount + couponDiscount).toFixed(2) %></span></div>
+                                <div class="checkout__order__total">Total Amount <span id="total1"><%= Total.toFixed(2) %></span></div>
+                            
+                                <div class="form-group">
+                                    <% if (parseFloat(walletBalance) >= parseFloat(Total)) { %>
                                     <div class="col-md-12">
-                                    <div class="radio">
-                                        <label>
-                                            <input type="radio" name="payment" value="wallet" >
-                
-                                            Pay with Wallet
-                                        </label>
+                                        <div class="radio">
+                                            <label>
+                                                <input type="radio" name="payment" value="wallet">
+                                                Pay with Wallet
+                                            </label>
+                                        </div>
                                     </div>
-                                    </div>
-                                <% } else { %>
+                                    <% } else { %>
                                     <div class="col-md-12">
-                                    <div class="radio">
-                                        <label>
-                                            <input type="radio" name="payment" value="wallet" disabled>
-                                            Pay with Wallet
-                                        </label>
-                                        <span style="color: red;font-size: 10px;">Not enough amount in wallet</span>
+                                        <div class="radio">
+                                            <label>
+                                                <input type="radio" name="payment" value="wallet" disabled>
+                                                Pay with Wallet
+                                            </label>
+                                            <span style="color: red; font-size: 10px;">Not enough amount in wallet</span>
+                                        </div>
                                     </div>
-                                </div>
-                            
-                                <% } %>
-                            
-                                
-
-                               
-                                <div class="col-md-12">
-                                    <div class="radio">
-                                        <label><input type="radio" name="payment" value="online" required>
-                                            Online Payment
-                                        </label>
+                                    <% } %>
+                                    
+                                    <div class="col-md-12">
+                                        <div class="radio">
+                                            <label>
+                                                <input type="radio" name="payment" value="online" required>
+                                                Online Payment
+                                            </label>
+                                        </div>
                                     </div>
-                                </div>
                             
-
-                            
-                                <div class="col-md-12">
-                                    <div class="radio">
-                                        <% if (Total <= 1000) { %>
-                                        <label><input type="radio" name="payment" value="COD" required> Cash On Delivery</label>
-                                        <% } else { %>
-                                            <label><input type="radio" name="payment" value="COD" disabled >
-                                            <span>Cash On Delivery</span>
+                                    <div class="col-md-12">
+                                        <div class="radio">
+                                            <% if (Total <= 1000) { %>
+                                            <label>
+                                                <input type="radio" name="payment" value="COD" required> Cash On Delivery
+                                            </label>
+                                            <% } else { %>
+                                            <label>
+                                                <input type="radio" name="payment" value="COD" disabled>
+                                                <span>Cash On Delivery</span>
                                             </label>
                                             <p style="color: red; font-size: 10px;">Cash on Delivery is only available for orders under ₹1000.</p>
-
-                                       <% } %>
+                                            <% } %>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                            </div>
-
                             
+                                <button type="submit" class="site-btn">PLACE ORDER</button>
+                            </div>
+                            
+                            
+                            
+                            
+                            <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
 
-                            <button type="submit" class="site-btn">PLACE ORDER</button>
-                        </div>
-                    </div>
-                </div>
-            </form>
-        </div>
-    </div>
+                           <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 
-</section>
-
-
-<!-- Checkout Section End -->
-
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
-
-<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
-
-<script>
-    console.log("Wallet Amount: <%= walletAmount %>, Total: <%= Total %>");
-</script>
+                           <script>
+                           console.log("Wallet Amount: <%= walletBalance %>, Total: <%= Total %>");
+                         </script>
 
 <script>
     $("#checkout").submit((e) => {
@@ -194,12 +162,14 @@
         console.log(selectedAddress)
         const payment = $("input[name=payment]:checked").val();
         const products = "<%= JSON.stringify(products) %>";
+        const couponCode = document.getElementById("couponCodeField").value;
 
 
         console.log(amount);
         console.log(selectedAddress);
         console.log(payment);
         console.log(discountAmount);
+        console.log(couponCode)
 
        
         $.ajax({
@@ -213,7 +183,8 @@
                 pin: selectedAddress.pin,
                 payment: payment,
                 discountAmount: discountAmount,
-                products: products
+                products: products,
+                couponCode : couponCode
             },
             success: (response) => {
                  if (response.success == true) {
@@ -227,6 +198,7 @@
     })
 
     function razorpayPayment(order) {
+        console.log("ORDER",order)
 
 var options = {
     "key": "rzp_test_EHW8XOWQ4MCkeR", 
@@ -253,8 +225,51 @@ var options = {
     },
     "theme": {
         "color": "#3399cc"
+    },
+    "modal": {
+             
+            "ondismiss": async function() {
+
+                if(order.status === "Pending") {
+                    alert("Payment is still pending or failed. Please try again.");
+                    // Redirect to My Orders page to retry payment
+                    window.location.href = '/myorders'; // Update this to your My Orders URL
+                }
+            }
+        }
     }
-};
+               
+                
+                // Make a single request to handle both tasks
+    //             const response = await fetch("/increaseProductQuantity", {
+    //                 method: "POST",
+    //                 headers: {
+    //                     "Content-Type": "application/json",
+    //                 },
+    //                 body: JSON.stringify({  paymentId :objectId}),
+    //             });
+
+    //             const result = await response.json();
+    //             if (result.success) {
+    //                 Swal.fire({
+    //                     icon: 'info',
+    //                     title: 'Payment Incomplete',
+    //                     text: 'Your payment is pending. You can continue from the orders page.',
+    //                     confirmButtonText: 'OK'
+    //                 }).then(() => {
+    //                     window.location.href = '/myorders'; // Redirect to orders page
+    //                 });
+    //             } else {
+    //                 Swal.fire({
+    //                     icon: 'error',
+    //                     title: 'Error',
+    //                     text: 'Failed to update payment status and increase quantity.',
+    //                 });
+    //             }
+    //         }
+    //     }
+    // };
+
 const rzp1 = new Razorpay(options);
 rzp1.open();
 }
@@ -282,99 +297,102 @@ $.ajax({
 })
 }
 
-function applycoupon(code) {
-const amount = document.getElementById('total1').innerHTML;
-console.log(amount);
-$.ajax({
-    url: "/applyCoupon",
-    data: {
-        code: code,
-        amount: amount
-    },
-    method: "post",
-    success: (response) => {
-        console.log(response);
-        if (response.user) {
-            console.log("You have already used this coupon");
-            Swal.fire({
-                icon: 'error',
-                title: 'Oops...',
-                text: 'This coupon already used by you!'
-            })
-        } else if (response.limit) {
-            console.log("coupon limit exceeded");
-            Swal.fire({
-                icon: 'error',
-                title: 'Oops...',
-                text: 'coupon limit exceeded!'
-            })
-        } else if (response.status) {
-            console.log("This coupon now not in use");
-            Swal.fire({
-                icon: 'error',
-                title: 'Oops...',
-                text: 'This coupon is not in use now!'
-            })
-        } else if (response.cartAmount) {
-            console.log("You cant use the coupon...Buy more");
-            Swal.fire({
-                icon: 'error',
-                title: 'Oops...',
-                text: 'You cant use the coupon...Buy more'
-            })
-        } else if (response.date) {
-            console.log("coupon date expired");
-            Swal.fire({
-                icon: 'error',
-                title: 'Oops...',
-                text: 'Coupon expired!!!'
-            })
-        } else if (response.amountOkey) {
-            console.log("discount granted");
-            document.getElementById('discount').innerHTML = response.disAmount
-            document.getElementById('total1').innerHTML = response.disTotal
-            console.log("done");
-            Swal.fire({
-                position: 'center',
-                icon: 'success',
-                title: 'Discount redeemed',
-                showConfirmButton: false,
-                timer: 1500
-            })
-        } else if (response.invalid) {
-            console.log("invalid coupon");
-            Swal.fire({
-                icon: 'error',
-                title: 'Oops...',
-                text: 'Invalid Coupon!!!'
-            })
-        }
-    }
-})
-}
 
-function removecoupon() {
-    const originalTotal = "<%= Total.toFixed(2) %>"; // Store original total
-    const discountElement = document.getElementById('discount');
-    const totalElement = document.getElementById('total1');
-    
-    // Reset discount and total to original values
-    discountElement.innerHTML = '0.00';
-    totalElement.innerHTML = originalTotal;
-    
-    // Optional: Clear coupon code input field
-    document.getElementById('code').value = '';
+                            
+                                function applycoupon(code) {
+                                    const amount = document.getElementById('total1').innerHTML;
+                                    console.log(amount);
+                                    $.ajax({
+                                        url: "/applyCoupon",
+                                        data: JSON.stringify({ couponCode: code, amount: amount }),
+                                        contentType: 'application/json',
+                                        method: "post",
+                                        success: (response) => {
+                                            console.log(response);
+                                            if (response.success) { // Assume server returns { success: true, disAmount: ..., disTotal: ... }
+                                                console.log("Discount Amount:", response.discountAmount);
+                                               //console.log("Total Amount after Discount:", response.discountTotal);
 
-    // Provide feedback
-    Swal.fire({
-        position: 'center',
-        icon: 'success',
-        title: 'Coupon removed',
-        showConfirmButton: false,
-        timer: 1500
-    });
-}
+                                                document.getElementById('discount').innerHTML = response.discountAmount.toFixed(2);
+                                                document.getElementById('total1').innerHTML = response.finalTotal.toFixed(2)
+                                                console.log("finalTotal",response.finalTotal)
+                                                document.getElementById("couponCodeField").value = code;
+                                                console.log("code",code)
+                                                //document.getElementById('total1').innerHTML = response.discountTotal.toFixed(2);
+                                                Swal.fire({
+                                                    position: 'center',
+                                                    icon: 'success',
+                                                    title: 'Discount redeemed',
+                                                    showConfirmButton: false,
+                                                    timer: 1500
+                                                });
+                                            } else {
+                                                handleCouponError(response);
+                                            }
+                                        },
+                                        error: (jqXHR, textStatus, errorThrown) => {
+                                            Swal.fire({
+                                                title: 'Oops...',
+                                                text: 'An error occurred while applying the coupon',
+                                                icon: 'error'
+                                            });
+                                        }
+                                    });
+                                }
+                            
+                                function handleCouponError(response) {
+                                    let message = 'Invalid Coupon!';
+                                    if (response.user) {
+                                        message = 'This coupon has already been used by you!';
+                                    } else if (response.limit) {
+                                        message = 'Coupon limit exceeded!';
+                                    } else if (response.status) {
+                                        message = 'This coupon is not in use now!';
+                                    } else if (response.cartAmount) {
+                                        message = "You can't use the coupon... Buy more.";
+                                    } else if (response.date) {
+                                        message = 'Coupon expired!!!';
+                                    } else if (response.invalid) {
+                                        message = 'Invalid Coupon!!!';
+                                    }
+                                    Swal.fire({
+                                        icon: 'error',
+                                        title: 'Oops...',
+                                        text: message
+                                    });
+                                }
+                            
+                                function removecoupon() {
+                                    $.ajax({
+                                        url: '/removeCoupon',
+                                        method: 'post',
+                                        success: function(response) {
+                                            if (response.success) {
+                                                document.getElementById('discount').innerHTML = '0';
+                                                document.getElementById('total1').innerHTML = response.totalAmount;
+                                                Swal.fire({
+                                                    title: 'Coupon Removed',
+                                                    text: "Coupon removed successfully!",
+                                                    icon: 'success'
+                                                });
+                                            } else {
+                                                Swal.fire({
+                                                    title: 'Error',
+                                                    text: "Failed to remove coupon",
+                                                    icon: 'error'
+                                                });
+                                            }
+                                        },
+                                        error: function() {
+                                            Swal.fire({
+                                                title: 'Oops...',
+                                                text: "An error occurred while removing the coupon",
+                                                icon: 'error'
+                                            });
+                                        }
+                                    });
+                                }
+                            </script>
+                            
 
 
-
-</script>

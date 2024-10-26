@@ -108,5 +108,6 @@ admin_route.get('/salesreport/download', authAdmin.isLogin, parseDateMiddleware,
 
 
 
+
 module.exports = admin_route
 

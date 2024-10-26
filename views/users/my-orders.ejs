@@ -84,7 +84,11 @@
                                               <a href="javascript:void(0);" class="view" onclick="showReturnModal('<%= order._id %>')">Return Order</a>
                                               <% } else if(order.status == "Return Pending" || order.status == "Return Completed" || order.status =="Return Rejected") {%>
                                                  <a href="javascript:void(0);" class="view"><%= order.status%></a>
-                                              <% } %>   
+                                              <% } %> 
+                                              
+                                              <% if (order.status == 'Pending') { %>
+                                                <button class="btn btn-success" onclick="openRazorpayModal('<%= order._id %>')">Pay Now</button>
+                                              <% } %>
                                           </td>
                                         </tr>
                                       <% })%>
@@ -154,6 +158,8 @@
             </div>
         </div>
     </div>
+    
+
 
    
     

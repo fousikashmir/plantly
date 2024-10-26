@@ -50,6 +50,12 @@ product:[{
 
 }],
 
+coupon: {
+    type: mongoose.Schema.Types.ObjectId, 
+    ref: "coupon",
+    default: null 
+},
+
 paid:{type:Number},
 totalAmount:{type:Number},
 status:{
@@ -68,6 +74,7 @@ returnReason:{
     default:null
 },
 paymentId:{type:String},
+
 requests:[{
     type:{
         type:String,

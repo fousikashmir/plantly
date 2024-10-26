@@ -85,6 +85,8 @@ user_route.get('/checkout',auth.isLogin,checkoutController.getCheckout)
 
 
 //order
+
+user_route.post('/applyCoupon',couponUserController.applyCoupon)
 user_route.post('/checkout',checkoutController.placeOrder)
 user_route.get('/placeorder',checkoutController.orderPlaced)
 user_route.post('/verifyPayment',orderController.verifyOnlinePayment)
@@ -102,8 +104,8 @@ user_route.post('/addtowishlist',auth.isLogin,wishListController.addToWishList)
 user_route.post('/wishtoCart',auth.isLogin,wishListController.addToCartFromWishlist)
 user_route.delete('/removewishproduct',auth.isLogin,wishListController.removeProduct)
 
-user_route.post('/applyCoupon',couponUserController.applyCoupon)
 
+user_route.post('/removeCoupon',couponUserController.removeCoupon)
 user_route.get('/wallet',walletController.loadWallet)
 
 

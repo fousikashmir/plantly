@@ -11,6 +11,7 @@ const walletTransaction = require('../../models/walletTransactionModel')
 const session =require('express-session')
 
 const Razorpay = require('razorpay')
+const mongoose = require('mongoose')
 
 let dotenv = require('dotenv')
 dotenv.config()
@@ -32,17 +33,32 @@ async function recordWalletTransaction(userId , transactionType , amount , descr
         await transaction.save();
         console.log('Wallet transaction recorded succesfully')
 
+        const user = await users.findById(userId)
+        let newBalance = user.walletBalance
+        if(transactionType === 'credit'){
+            newBalance += amount
+        }else if(transactionType === 'debit'){
+            newBalance -= amount
+        }
+        user.walletBalance = newBalance
+        await user.save()
+        console.log('Wallet balance updated successfully:', user.walletBalance);
+
+
+
+
     }catch(error){
         console.log('Error recording wallet transaction',error)
     }
 } 
 
+
 const getCheckout = async function (req, res) {
     try {
-        const availableCoupons = await coupon.find({});
         const session = req.session.user_id;
         const userData = await users.findById({ _id: session });
         const cartData = await cart.findOne({ userId: session }).populate("products.productId");
+        const availableCoupons = await coupon.find({});
         const products = cartData.products;
 
         const rawTotal = await cart.aggregate([
@@ -54,30 +70,22 @@ const getCheckout = async function (req, res) {
 
         const total = rawTotal.length > 0 ? rawTotal[0].total : 0;
 
-
         let snakePlantDiscount = 0;
         let floweringPlantsDiscount = 0;
-        let couponDiscount = 0;
 
         for (let i = 0; i < products.length; i++) {
             const product = products[i].productId;
             const quantityInCart = products[i].quantity;
 
-            // Fetch the latest stock from the database
             const currentProduct = await productModel.findById(product._id);
             const currentStock = currentProduct.stock;
 
             if (quantityInCart > currentStock) {
-               
                 return res.status(400).json({
                     message: `The quantity for ${product.name} exceeds the available stock. Please adjust your cart.`
                 });
             }
 
-            // Check stock availability
-        
-
-            // Calculate discounts as before
             if (product.name === 'snake plant') {
                 snakePlantDiscount += 50 * quantityInCart;
             }
@@ -89,56 +97,36 @@ const getCheckout = async function (req, res) {
         const totalAfterSnakePlantDiscount = total - snakePlantDiscount;
         const finalTotal = totalAfterSnakePlantDiscount - floweringPlantsDiscount;
 
-        
-
-        
-
-       
-        const appliedCouponCode = req.body.couponCode;
-        if (appliedCouponCode) {
-            const Coupon = await coupon.findOne({ code: appliedCouponCode });
-            if (coupon && coupon.status && coupon.expiryDate > Date.now()) {
-                if (coupon.user.includes(session) || coupon.maxUsers <= coupon.user.length) {
-                    return res.status(400).json({ message: "Coupon has been used or exceeded maximum usage limit" });
-                }
-                if (coupon.discountType === 'percentage') {
-                    couponDiscount = finalTotal * (coupon.discountAmount / 100);
-                } else if (coupon.discountType === 'fixed') {
-                    couponDiscount = Math.min(coupon.discountAmount, coupon.maxDiscountAmount || Infinity);
-                }
-                await coupon.updateOne(
-                    { code: appliedCouponCode },
-                    { $push: { user: session } }
-                );
-            } else {
-                return res.status(400).json({ message: "Invalid or expired coupon" });
-            }
+        // Check for any pre-applied coupon in session
+        let couponDiscount = 0;
+        if (req.session.appliedCoupon) {
+            couponDiscount = req.session.appliedCoupon.discountAmount || 0;
         }
 
         const finalTotalAmount = (finalTotal - couponDiscount).toFixed(2);
-        const addressdata = await address.findOne({ user: session });
-        const walletData = await walletTransaction.findOne({ userId: session });
-        console.log("Wallet Data from DB:", walletData);
-        const walletAmount = walletData ? parseFloat(walletData.amount.toFixed(2)) : 0;
-        console.log("WW",walletAmount)
+        console.log("FinalTotalAmount",finalTotalAmount)
+        req.session.finalTotalAmount = finalTotalAmount;
 
+        const addressdata = await address.findOne({ user: session });
+        //const walletData = await walletTransaction.findOne({ userId: session });
         
-        
+        const walletBalance = userData.walletBalance||0 
+        console.log("WB",walletBalance)
         
 
         res.render('checkout', {
             session,
             userData,
-            originalTotal:parseFloat(total),
+            originalTotal: parseFloat(total),
             Total: parseFloat(finalTotalAmount),
             addressdata: addressdata || {},
             products: cartData.products,
-             snakePlantDiscount,
-             floweringPlantsDiscount,
-             couponDiscount,
+            snakePlantDiscount,
+            floweringPlantsDiscount,
+            couponDiscount,
+            appliedCoupon: req.session.appliedCoupon, 
             availableCoupons,
-            walletAmount:parseFloat(walletAmount)
-            
+            walletBalance:walletBalance.toFixed(2)
         });
 
     } catch (error) {
@@ -148,50 +136,53 @@ const getCheckout = async function (req, res) {
 };
 
 
-
- 
 const placeOrder = async (req, res) => {
     try {
         const userData = await users.findOne({ _id: req.session.user_id });
+        const Total = req.session.finalTotalAmount;
         const session = req.session.user_id;
+        console.log("Session Data at Order Placement:", req.session.appliedCoupon); // Check entire session object
+    if (!req.session.appliedCoupon) {
+        return res.json({ success: false, message: "No coupon applied." });
+    }
+    const couponId = req.session.appliedCoupon ? req.session.appliedCoupon._id : null;
+    console.log("COUID",couponId)
+    const couponCode = req.session.appliedCoupon ? req.session.appliedCoupon.code : null;
 
-        const totalResult = await cart.aggregate([
-            { $match: { userId: userData._id } },
-            { $unwind: "$products" },
-            { $project: { productPrice: "$products.productPrice", quantity: "$products.quantity" } },
-            { $group: { _id: null, total: { $sum: { $multiply: ["$productPrice", "$quantity"] } } } }
-        ]);
 
-        const TotalInitially = totalResult.length > 0 ? totalResult[0].total : 0;
-        let discountAmount = req.body.discountAmount || 0;
-        const Total = (TotalInitially - discountAmount).toFixed(2); 
-        console.log("**",Total)
-        const walletData = await walletTransaction.findOne({userId:req.session.user_id})
-        const userWalletAmount = walletData ? parseFloat(walletData.amount.toFixed(2)) : 0;
-        console.log(userWalletAmount);
+console.log("Coupon Code:", couponCode);          
+
+    
+
+        
+
+
+        
+        const walletBalance = userData.walletBalance || 0;
+        console.log(walletBalance);
 
         let payment = req.body.payment;
         let paidAmount = 0;
         let walletAmountUsed = 0;
-        let walletAmount = userWalletAmount;
+        let updatedWalletBalance = walletBalance
         let status = payment === 'online' ? 'Pending' : 'Placed'; 
 
         if (payment === "wallet") {
-            if (userWalletAmount >= Total) {
+            if (walletBalance >= Total) {
                 paidAmount = Total;  
                 walletAmountUsed = Total;
-                walletAmount = userWalletAmount - Total;
+                updatedWalletBalance = walletBalance - Total;
                 status = 'Placed'; 
 
-                walletData.amount = walletAmount;
-                await walletData.save();
+                userData.walletBalance = updatedWalletBalance;
+                //await userData.save();
             } else { 
                 return res.json({ success: false, message: "Not enough balance in the wallet." });
             }
         } else if (payment === 'online' || payment === 'COD') {
             paidAmount = req.body.amount || Total;  
             walletAmountUsed = 0;
-            walletAmount = userWalletAmount;
+            updatedWalletBalance = walletBalance
         }
 
         if (walletAmountUsed > 0) {
@@ -217,14 +208,18 @@ const placeOrder = async (req, res) => {
             paymentMethod: payment,
             paid: paidAmount,
             wallet: walletAmountUsed,
-            discount: discountAmount,
+            discount: req.session.appliedCoupon ? req.session.appliedCoupon.discountAmount : 0,
             product: products,
-            totalAmount: TotalInitially,
+            totalAmount: Total,
             date: Date.now(),
-            status: status
+            status: status,
+            couponCode: couponCode,
+            coupon: couponId,
+
         });
 
         const saveOrder = await newOrder.save();
+        console.log("Order data after save:", saveOrder);
 
         const product = saveOrder.product;
         let stockIssue = false;
@@ -259,6 +254,7 @@ const placeOrder = async (req, res) => {
 
         if (status === 'Placed') {
             await cart.deleteOne({ userId: userData._id });
+             delete req.session.appliedCoupon
             return res.json({ success: true });
         } else {
             const orderId = saveOrder._id;
@@ -295,11 +291,17 @@ const orderPlaced = async (req, res) => {
     }
 }
 
+
+
+
+
+
 module.exports = {
     getCheckout,
     placeOrder,
     orderPlaced,
-    recordWalletTransaction
+    recordWalletTransaction,
+    
 }
  
  

@@ -63,7 +63,7 @@
                         <div class="form-floating mb-3">
                             <div class="d-flex flex-coloum " style="justify-content: space-between; ">
                                 <%productData.image.forEach((value,index)=>{%>
-                                    <div class="border border-dark border-2">
+                                    <div class="border border-dark border-2 image-container" data-index="<%= index %>" data-id="<%= productData._id %>" data-type="existing">
                                         <img height="100px" src="/productimages/<%=productData.image[index]%>" alt="" width="100px">
                                         <div style="padding-left: 1em;">
                                             <button type="button" class="btn btn-danger btn-sm"
@@ -141,13 +141,18 @@
                         function deletePhoto(event) {
                                 const button = event.target;
                                 const container = button.closest('.image-container');
+                                if (!container) {
+                                console.warn('Image container not found.');
+                                      return;
+                                  }
+
                                 const index = container.getAttribute('data-index');
                                 const id = container.getAttribute('data-id');
                                 const type = container.getAttribute('data-type');
 
                                 if (type === 'existing') {
                                     // Delete existing image from the server
-                                    fetch('/admin/delete-image', {
+                                    fetch('/admin/delete_image', {
                                         method: 'POST',
                                         headers: {
                                             'Content-Type': 'application/json',

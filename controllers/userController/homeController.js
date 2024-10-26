@@ -2,6 +2,7 @@ const users = require("../../models/userModel")
 
 const product = require('../../models/productModel')
 const category = require('../../models/categoryModel')
+const wishlist = require('../../models/wishlistModel')
 
 const shortid = require('shortid');
 const bcrypt = require('bcrypt')

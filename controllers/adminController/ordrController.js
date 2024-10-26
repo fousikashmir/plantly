@@ -32,17 +32,32 @@ const getOrders = async(req,res)=>{
         const limit = parseInt(req.query.limit) || 10;
         const skip = (page-1) * limit;
 
-        const orders = await order.find({}).sort({createdAt:-1}).skip(skip).limit(limit);
+        const month = req.query.month || '';
+        const productId = req.query.product || '';
         
-        const totalOrders = await order.countDocuments();
+        let filter = {}
+        if(month){
+          const startDate = new Date(2024,month-1,1)
+          const endDate = new Date(2024,month,0)
+          filter['date'] = { $gte: startDate, $lt: endDate }
+        }
+
+        if(productId){
+          filter['product.productId'] = productId
+        }
+
+        const orders = await order.find(filter).sort({createdAt:-1}).skip(skip).limit(limit);
+        
+        const totalOrders = await order.countDocuments(filter);
 
         
         const totalPages = Math.ceil(totalOrders / limit)
+        const products = await productModel.find({})
         res.render('order',{
             message:orders,
             currentPage: page,
             totalPages: totalPages,
-            
+            products:products
         })
 
     }catch(error){
@@ -131,6 +146,17 @@ const cancelOrder = async (req, res) => {
         const refundAmount = orderData.totalAmount;
       
         console.log(`Processing refund of ${refundAmount} for user ${userId}`);
+
+        const userData = await User.findById(userId);
+        if (!userData) {
+            return res.status(404).json({ success: false, message: 'User not found.' });
+        }
+
+  
+        userData.walletBalance += refundAmount;
+
+        
+        await userData.save();
     
   
     
@@ -175,6 +201,16 @@ const cancelOrder = async (req, res) => {
                     }
 
                        const totalBillAmount = orderData.totalAmount;
+                       const userData = await User.findById(userId);
+                       if (!userData) {
+                       return res.status(404).json({ success: false, message: 'User not found' });
+                        }
+
+    
+                        userData.walletBalance += totalBillAmount;
+
+      
+                       await userData.save();
                        const transactionType = 'credit';
                         const transactionAmount =totalBillAmount;
                         

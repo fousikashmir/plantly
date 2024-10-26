@@ -82,11 +82,53 @@ const getAdminPanel = async (req, res) => {
         salesData[sale._id - 1] = sale.total;
 });
 
+const topSellingProducts = await order.aggregate([
+    { $unwind: "$product" },
+    {
+        $group: {
+            _id: "$product.productId",
+            totalSold: { $sum: "$product.quantity" }
+        }
+    },
+    { $sort: { totalSold: -1 } },
+    {
+        $lookup: {
+            from: "products",
+            localField: "_id",
+            foreignField: "_id",
+            as: "productDetails"
+        }
+    },
+    { $limit: 5 }  
+]);
+
+// Fetch top-selling categories
+const topSellingCategories = await order.aggregate([
+    { $unwind: "$product" },
+    {
+        $lookup: {
+            from: "products",
+            localField: "product.productId",
+            foreignField: "_id",
+            as: "productDetails"
+        }
+    },
+    { $unwind: "$productDetails" }, // Unwind product details to access category information
+    {
+        $group: {
+            _id: "$productDetails.category",  // Group by category
+            totalSold: { $sum: "$product.quantity" }
+        }
+    },
+    { $sort: { totalSold: -1 } },
+    { $limit: 5 }  // Adjust the limit based on how many top categories you want to show
+]);
+
 
        
         console.log(salesData);
 
-        res.render('admin-panel', { total, user_count, order_count, product_count, payment, month: salesData })
+        res.render('admin-panel', { total, user_count, order_count, product_count, payment, month: salesData,topSellingProducts,topSellingCategories })
     } catch (error) {
         console.log(error)
     }
@@ -101,6 +143,9 @@ const parseDateMiddleware = (req, res, next) => {
 
     next();
 };
+
+
+
 
  //sales report
  
@@ -214,5 +259,6 @@ module.exports = {
     getSalesReport,
     recordWalletTransaction,
     parseDateMiddleware,
-    downloadSalesReport
+    downloadSalesReport,
+    
     }

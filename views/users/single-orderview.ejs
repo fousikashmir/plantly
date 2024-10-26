@@ -62,15 +62,23 @@
                                     </td>
                                 </tr>
 
-                                <% if (orderData.status == "Delivered") { %>
-                                    <a class="btn btn-md btn-black-default-hover" href="/downloadOrderInvoice?orderId=<%= orderData._id %>" style="background-color: green; color: white;">download invoice</a>
-                                <% } %>
+                               
                                 
 
                                 <%})%>
 
                         </tbody>
                     </table>
+
+                    <% if (orderData.coupon ) { %>
+                        <p>Coupon Code: <%= orderData.coupon.code %></p>
+                        <p>Discount: <%= orderData.coupon.discountAmount %></p>
+                    <% } else { %>
+                        <p>No coupon applied.</p>
+                    <% } %>
+                    <% if (orderData.status == "Delivered") { %>
+                        <a class="btn btn-md btn-black-default-hover" href="/downloadOrderInvoice?orderId=<%= orderData._id %>" style="background-color: green; color: white;">download invoice</a>
+                    <% } %>
                 </div>
                 <div class="col-lg-6 col-md-3 order_box" style="margin: 30px;">
                     <h2>Your Order Payment Details</h2>

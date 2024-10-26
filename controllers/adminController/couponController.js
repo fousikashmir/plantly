@@ -41,7 +41,8 @@ const coupon = require("../../models/couponModel")
             maxCartAmount: req.body.cartamount,
             expiryDate: req.body.expirydate,
             maxUsers: req.body.couponcount,
-            status : couponStatus
+            status : couponStatus,
+            user: [] 
         })
         const couponData = await newCoupon.save()
 

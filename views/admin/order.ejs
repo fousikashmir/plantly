@@ -39,6 +39,26 @@ ul.pagination li a {
           <div class="card" style="margin-top: 40px;">
             <div class="card-body">
               <h5 class="card-title">Order Details</h5>
+
+              <div style="margin-bottom: 20px;">
+                <!-- Month Filter -->
+                <select id="monthFilter" onchange="applyFilters()">
+                  <option value="">Filter by Month</option>
+                  <% for(let i = 0; i < 12; i++) { %>
+                    <option value="<%= i+1 %>"><%= new Date(2024, i).toLocaleString('default', { month: 'long' }) %></option>
+                  <% } %>
+                </select>
+  
+                <!-- Product Filter -->
+                <select id="productFilter" onchange="applyFilters()">
+                  <option value="">Filter by Product</option>
+                  <% products.forEach(product => { %>
+                    <option value="<%= product._id %>"><%= product.name %></option>
+                  <% }) %>
+                </select>
+              </div>
+
+
               <div class="table-responsive">
                 <table style="color: black; background-color: white;" id="productTable"  >            
                         <thead>
@@ -145,6 +165,13 @@ ul.pagination li a {
 
                      <script>
 
+function applyFilters() {
+    const month = document.getElementById('monthFilter').value;
+    const product = document.getElementById('productFilter').value;
+    const queryString = `?month=${month}&product=${product}`;
+    window.location.href = `/admin/orders${queryString}`;
+  }
+
 
 async function cancelOrder(orderId,userId) {
   const result = await Swal.fire({
@@ -195,10 +222,10 @@ async function cancelOrder(orderId,userId) {
                         
   
                                     
-                      </script>
+                      
                       
 
-                      <script>
+                      
                         $(document).ready(function() {
                           $('#productTable').DataTable({
                             "bInfo": false  
