@@ -24,8 +24,23 @@ app.use(session({
     cookie: { maxAge: 1000 * 60 * 60 * 24} 
 }));
 
-mongoose.connect(process.env.MONGODB_URL)
-console.log('MongoDB URL:', process.env.MONGODB_URL);
+
+
+
+
+mongoose.connect(process.env.MONGODB_URI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+  user: process.env.MONGODB_USER,
+  pass: process.env.MONGODB_PASS,
+  authSource: 'admin'
+}).then(() => {
+  console.log('Connected to MongoDB!');
+}).catch((error) => {
+  console.error('Connection error:', error);
+});
+
+
 
 
 app.use('/',userRoute)
@@ -43,6 +58,7 @@ app.use((err, req, res, next) => {
 });
 
 const port = process.env.PORT ||3000
-app.listen(port,function(){
-    console.log("Server is running")
-})
+app.listen(port, '0.0.0.0', () => {
+    console.log("Server is running");
+});
+
