@@ -32,7 +32,7 @@ mongoose.connect(process.env.MONGODB_URI, {
   
   user: process.env.MONGODB_USER,
   pass: process.env.MONGODB_PASS,
-  authSource: 'admin'
+  authSource: 'plantly'
 }).then(() => {
   console.log('Connected to MongoDB!');
 }).catch((error) => {
