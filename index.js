@@ -29,8 +29,7 @@ app.use(session({
 
 
 mongoose.connect(process.env.MONGODB_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
+  
   user: process.env.MONGODB_USER,
   pass: process.env.MONGODB_PASS,
   authSource: 'admin'
