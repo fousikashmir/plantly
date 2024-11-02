@@ -28,16 +28,13 @@ app.use(session({
 
 
 
+const mongoose = require('mongoose');
 mongoose.connect(process.env.MONGODB_URI, {
   
-  user: process.env.MONGODB_USER,
-  pass: process.env.MONGODB_PASS,
-  authSource: 'plantly'
-}).then(() => {
-  console.log('Connected to MongoDB!');
-}).catch((error) => {
-  console.error('Connection error:', error);
-});
+})
+.then(() => console.log('Connected to MongoDB Atlas'))
+.catch((error) => console.error('MongoDB connection error:', error));
+
 
 
 
