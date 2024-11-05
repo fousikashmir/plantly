@@ -34,7 +34,7 @@ user_route.use(express.urlencoded({extended:true}))
 user_route.get('/',homeController.getHome)
 user_route.get('/login',auth.isLogout,loginController.getLogin)
 user_route.post('/login',loginController.postLogin)
-user_route.get('/register',auth.isLogout,registerController.getRegister)
+user_route.get('/register',registerController.getRegister)
 user_route.post('/register',registerController.postRegister)
 
 

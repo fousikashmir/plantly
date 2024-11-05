@@ -118,7 +118,8 @@ const postRegister = async (req, res) => {
               })
                   
                   const userDoc = await newUser.save();
-                   console.log(userDoc)
+                  console.log("User successfully saved:", userDoc);
+                   
                   if (userDoc) {
                       var randomNumber = Math.floor(Math.random() * 9000) + 1000;
                       otp = randomNumber;
