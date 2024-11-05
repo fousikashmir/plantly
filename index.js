@@ -17,6 +17,8 @@ app.use(express.static('public/users'));
 app.use(express.static('public/admin'));
 
 app.use(express.static(path.join(__dirname, 'public')));
+app.set('views', path.join(__dirname, 'views'));
+
 app.use(session({
     secret: config.sessionSecret, 
     saveUninitialized: false,
