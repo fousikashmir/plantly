@@ -141,10 +141,10 @@ const placeOrder = async (req, res) => {
         const userData = await users.findOne({ _id: req.session.user_id });
         const Total = req.session.finalTotalAmount;
         const session = req.session.user_id;
-        console.log("Session Data at Order Placement:", req.session.appliedCoupon); // Check entire session object
-    if (!req.session.appliedCoupon) {
-        return res.json({ success: false, message: "No coupon applied." });
-    }
+        //console.log("Session Data at Order Placement:", req.session.appliedCoupon); // Check entire session object
+    // if (!req.session.appliedCoupon) {
+    //     return res.json({ success: false, message: "No coupon applied." });
+    // }
     const couponId = req.session.appliedCoupon ? req.session.appliedCoupon._id : null;
     console.log("COUID",couponId)
     const couponCode = req.session.appliedCoupon ? req.session.appliedCoupon.code : null;
