@@ -50,8 +50,9 @@ app.use((req,res,next)=>{
 })
 
 app.use((err, req, res, next) => {
+    console.error(err.stack);
     res.status(err.status || 500);
-    res.render('error', { message: err.message });
+    res.render('error', { error: err });
   });
   
 
