@@ -18,9 +18,9 @@ const getHome = async function(req,res){
     
     try{
         if(session){
-            res.render('home',{userData,session,productData})
+            res.render('users/home',{userData,session,productData})
         }else{
-            res.render('home',{userData,session,productData})
+            res.render('users/home',{userData,session,productData})
         }
     }catch(error){
         console.log(error.message)
