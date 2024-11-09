@@ -65,16 +65,16 @@
         <% productData.forEach(product => { %>
         <div class="col-lg-4 col-md-4 col-sm-6 mb-4">
             <div class="featured__item">
-                <img src="/productimages/<%= product.image[0] %>" class="img-fluid">
+                <img src="/productimages/<%= product?.image[0] %>" class="img-fluid">
                 <ul class="featured__item__pic__hover">
-                    <li><a href="/product/<%= product._id %>"><i class="fa fa-eye view-btn"></i></a></li>
-                    <li><a  onclick="show('<%- product._id %>')"><i class="fa fa-shopping-cart"></i></a></li>
-                    <li><a onclick="addtoWishlist('<%- product._id %>')"><i class="fa fa-heart love-btn"></i></a></li>
+                    <li><a href="/product/<%= product?._id %>"><i class="fa fa-eye view-btn"></i></a></li>
+                    <li><a  onclick="show('<%- product?._id %>')"><i class="fa fa-shopping-cart"></i></a></li>
+                    <li><a onclick="addtoWishlist('<%- product?._id %>')"><i class="fa fa-heart love-btn"></i></a></li>
                 </ul>
             </div>
             <div class="featured__item__text">
-                <h6><a href="#"><%= product.name %></a></h6>
-                <h5>₹ <%= product.price %></h5>
+                <h6><a href="#"><%= product?.name %></a></h6>
+                <h5>₹ <%= product?.price %></h5>
             </div>
         </div>
     <% }) %>
